@@ -1,0 +1,5 @@
+{
+  "name": "hmd-tf-bartleby",
+  "description": "Runs the document generation transform",
+  "build": {}
+}
