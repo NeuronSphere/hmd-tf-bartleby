@@ -1,5 +1,27 @@
 {
-  "name": "hmd-tf-bartleby",
+  "identifier": "hmd-tf-bartleby",
+  "name": "repo_name",
   "description": "Runs the document generation transform",
-  "build": {}
+  "project_type": {
+    "name": "transform"
+  },
+  "build": {
+    "commands": [
+      [
+        "python"
+      ],
+      [
+        "docker"
+      ]
+    ]
+  },
+  "deploy": {
+    "commands": [
+      [
+        "docker"
+      ]
+    ],
+    "dependencies": {},
+    "default_configuration": {}
+  }
 }

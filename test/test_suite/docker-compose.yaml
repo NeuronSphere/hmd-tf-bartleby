@@ -1,0 +1,27 @@
+version: "3.2"
+services:
+  transform_test:
+    image: ghcr.io/hmdlabs/transform-test:test
+    container_name: transform-test
+    environment:
+      HMD_INSTANCE_NAME: transform-int-test
+      HMD_REPO_NAME: transform-repo
+      HMD_REPO_VERSION: test
+      HMD_ENVIRONMENT: kmw
+      HMD_REGION: reg1
+      HMD_CUSTOMER_CODE: hmd
+      HMD_DID: aaa
+      TRANSFORM_INSTANCE_CONTEXT: $TRANSFORM_INSTANCE_CONTEXT
+      TRANSFORM_NID: $TRANSFORM_NID
+    volumes:
+      - type: bind
+        source: "${PWD}/${TRANSFORM_INPUT}"
+        target: /hmd_transform/input
+      - type: bind
+        source: "${PWD}/${TRANSFORM_OUTPUT}"
+        target: /hmd_transform/output
+    secrets:
+      - my_secret
+secrets:
+  my_secret:
+    file: ./my_secret.txt

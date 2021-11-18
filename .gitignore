@@ -1,6 +1,9 @@
 .vscode/
 .idea/
-/src/*.egg-info/
+*.egg-info/
+*.pyc
+imports/
+__pycache__/
 
 # Logs
 logs
@@ -9,6 +12,8 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
+
+.pytest_cache/
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
@@ -78,9 +83,6 @@ typings/
 
 # parcel-bundler cache (https://parceljs.org/)
 .cache
-
-# PIP
-__pycache__/
 
 # Next.js build output
 .next
