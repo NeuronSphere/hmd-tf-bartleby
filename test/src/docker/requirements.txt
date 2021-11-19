@@ -1,1 +1,4 @@
-hmd-tf-bartleby
+sphinx-copybutton==0.3.1
+sphinx-jsonschema
+sphinx-inline-tabs
+when-changed==0.3.0

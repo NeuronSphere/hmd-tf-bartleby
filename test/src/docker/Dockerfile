@@ -1,15 +1,20 @@
 # syntax = docker/dockerfile:1.0-experimental
 
-FROM python:3.9
-COPY requirements.txt ${FUNCTION_DIR}
+FROM sphinxdoc/sphinx-latexpdf
+COPY doctools /hmd_transform/doctools
+COPY requirements.txt .
 
 COPY python .
 
+RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
+    pip install -r requirements.txt
+
 RUN python setup.py sdist bdist_wheel
-RUN pip install -U --no-index --no-deps --force-reinstall --find-links=./dist module_name==0.0.1
+RUN pip install -U --no-index --no-deps --force-reinstall --find-links=./dist hmd-tf-bartleby==0.0.1
 
 ENV TRANSFORM_INSTANCE_CONTEXT default
 ENV TRANSFORM_NID default
 
-COPY entrypoint.py ${FUNCTION_DIR}
+WORKDIR /app
+COPY entrypoint.py .
 ENTRYPOINT [ "python", "entrypoint.py" ]

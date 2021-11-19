@@ -1,7 +1,8 @@
 # syntax = docker/dockerfile:1.0-experimental
 
-FROM python:3.9
-COPY requirements.txt ${FUNCTION_DIR}
+FROM sphinxdoc/sphinx-latexpdf
+COPY doctools /hmd_transform/doctools
+COPY requirements.txt .
 
 RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
     pip install -r requirements.txt
@@ -9,5 +10,7 @@ RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
 ENV TRANSFORM_INSTANCE_CONTEXT default
 ENV TRANSFORM_NID default
 
-COPY entrypoint.py ${FUNCTION_DIR}
+WORKDIR /app
+COPY entrypoint.py .
+
 ENTRYPOINT [ "python", "entrypoint.py" ]
