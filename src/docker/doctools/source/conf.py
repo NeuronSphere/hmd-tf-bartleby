@@ -30,7 +30,8 @@ release = repo_version
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    'sphinx_copybutton'
+    'sphinx_copybutton',
+    'sphinxcontrib.plantuml'
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -40,6 +41,9 @@ templates_path = ['_templates']
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = []
+
+# path to jar file used for generating puml diagrams
+plantuml = 'java -jar /usr/local/bin/plantuml.jar'
 
 
 # -- Options for HTML output -------------------------------------------------
@@ -60,3 +64,6 @@ html_static_path = ['_static']
 # a list of builtin themes.
 #
 latex_theme = 'howto'
+
+# other elements used in latex pdf generation
+latex_elements = {}
