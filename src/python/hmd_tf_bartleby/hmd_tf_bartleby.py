@@ -50,12 +50,15 @@ def entry_point():
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))
             sphinx = run(cmd_ar, text=True, cwd=tmpdir)
 
-            logger.info("Copying generated docs..")
-            shutil.copytree(
-                src=os.path.join(tmpdir, "build"),
-                dst=output_content_path,
-                dirs_exist_ok=True,
-            )
+            if Path(os.path.join(tmpdir, "build")).exists():
+                logger.info("Copying generated docs..")
+                shutil.copytree(
+                    src=os.path.join(tmpdir, "build"),
+                    dst=output_content_path,
+                    dirs_exist_ok=True,
+                )
+            else:
+                logger.info("No generated docs to copy..")
 
             shutil.rmtree(tmpdir)
 

@@ -7,6 +7,7 @@ Welcome to HMD hmd-tf-bartleby's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+   transforms.rst
 
 Indices and tables
 ==================
