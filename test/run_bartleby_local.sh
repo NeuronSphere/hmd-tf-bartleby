@@ -8,7 +8,7 @@ else
 fi
 
 if [ -n "$2" ]; then
-  shell_in="${@/$1/""}"
+  shell_in="${@/$1/}"
   shell_in=${shell_in/ /}
   export SPHINX_CMD="{\"shell\": \"$shell_in\"}"
 else
