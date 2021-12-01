@@ -11,6 +11,8 @@
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 #
 import os
+import sys
+sys.path.insert(0, '/code/src/python')
 
 # -- Project information -----------------------------------------------------
 company_name_acronym = 'HMD'
@@ -31,8 +33,20 @@ release = repo_version
 # ones.
 extensions = [
     'sphinx_copybutton',
-    'sphinxcontrib.plantuml'
+    'sphinxcontrib.plantuml',
+    'sphinx.ext.autodoc',
+    'sphinx.ext.autosummary'
 ]
+
+# autodoc default options
+autodoc_default_options = {
+    'members': True,
+    'undoc-members': True,
+    'show-inheritance': True
+}
+
+# autodoc check for signatures within source code
+autodoc_docstring_signature = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -66,4 +80,6 @@ html_static_path = ['_static']
 latex_theme = 'howto'
 
 # other elements used in latex pdf generation
-latex_elements = {}
+latex_elements = {
+    'atendofbody': 'HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.'
+}

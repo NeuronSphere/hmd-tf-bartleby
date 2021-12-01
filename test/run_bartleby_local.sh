@@ -22,11 +22,12 @@ cp -r src/python/hmd_tf_bartleby test/src/docker/python
 
 popd
 
-hmd --repo-name hmd-tf-bartleby --repo-version test docker build
+#hmd --repo-name hmd-tf-bartleby --repo-version test docker build
 
 docker run -it --rm \
 -v "$HMD_REPO_HOME/$1/docs:/hmd_transform/input" \
 -v "$HMD_REPO_HOME/$1/target/bartleby:/hmd_transform/output" \
+-v "$HMD_REPO_HOME/$1/src/python:/code/src/python" \
 -v "$HMD_HOME/bartleby/log:/tmp" \
 -e "TRANSFORM_INSTANCE_CONTEXT=$SPHINX_CMD" \
 -e "HMD_DOC_REPO_NAME=$1" \
