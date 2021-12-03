@@ -3,10 +3,11 @@
 Bartleby Transform
 ===============================
 
-The bartleby transform engine is HMD's automatic document generation tool. It takes as its input a repository name along
+The bartleby transform engine is HMD's document rendering and packaging tool. It takes as its input a repository name along
 with the desired document format and produces the formatted documents as its output. The document generation features
 are simply extensions of the Sphinx documentation generator tools, while the automation features are based upon HMD's
 repository standards.
+
 
 Context:
 +++++++++
@@ -47,30 +48,6 @@ Project Structure:
       from the sphinx docker image and also includes a java runtime environment and external java packages needed for
       generating plantuml diagrams.
 
-    .. code-block:: dockerfile
-
-        FROM sphinxdoc/sphinx-latexpdf
-        COPY doctools /hmd_transform/doctools
-        COPY requirements.txt .
-
-        RUN apt-get update
-        RUN apt install -y curl
-        RUN curl -L "https://sourceforge.net/projects/plantuml/files/1.2021.14/plantuml.1.2021.14.jar/download" -o /usr/local/bin/plantuml.jar
-
-        RUN apt install -y default-jre
-
-        RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
-            pip install -r requirements.txt
-
-        ENV TRANSFORM_INSTANCE_CONTEXT default
-        ENV TRANSFORM_NID default
-
-        WORKDIR /app
-        COPY entrypoint.py .
-
-        ENTRYPOINT [ "python", "entrypoint.py" ]
-
-
     - *entrypoint.py*: the script used to import the python package
 
     .. code-block:: python
@@ -97,37 +74,6 @@ Project Structure:
 #. Python:
     - *hmd_tf_bartleby.py*: the code to implement the transformation
 
-    A basic structure is provided to set up logging, context variables and enable the entrypoint script to successfully
-    import the python package. The engine itself is defined in the ``do_transform()`` method.
-
-    .. code-block:: python
-
-        import logging
-        import sys
-        import os
-        from pathlib import Path
-
-        logging.basicConfig(
-            stream=sys.stdout,
-            format="%(levelname)s %(asctime)s - %(message)s",
-            level=logging.ERROR,
-        )
-
-        logger = logging.getLogger(__name__)
-        logger.setLevel(logging.DEBUG)
-
-
-        def entry_point():
-
-            # initialize variables for transform I/O
-            input_content_path = Path("/hmd_transform/input")
-            output_content_path = Path("/hmd_transform/output")
-
-            # assign context to variables
-            transform_instance_context = json.loads(
-                os.environ.get("TRANSFORM_INSTANCE_CONTEXT")
-            )
-            transform_nid = os.environ.get("TRANSFORM_NID")
 
 #. Meta-data:
     - *manifest.json*: defined with a standard structure to support python and docker commands
@@ -175,3 +121,30 @@ Project Structure:
 
         .. note::
             See *configured options* under TRANSFORM_INSTANCE_CONTEXT for ``target_format`` options
+
+
+
+A CLI
+==============================
+Some of this content should be moved to a more standard location for 'cli-ing a transform'.
+
+The idea of a CLI for bartleby or any other transform is similar - the executable communicates with the docker
+daemon via a library to launch and manage a transform with a particular set of volume mappings and configurations.
+
+This "CLI" would reasonably be called a "wrapper" or perhaps an "adaptor" with regard to the actual transform image.
+
+One of the things that makes a CLI useful is passing parameters to control a program's behavior. A Transform CLI wrapper
+maps user entered CLI parameters onto the mechanisms the transform image requires in order to work.  In the case of
+Bartleby (and many others), the parameters to the CLI will be "passed through" to the transform as a single blob via the
+transform context and the 'shell' key.
+
+The assumption is that the CLI is run 'above or within' a standard repository.  If run from <repo_root>/ it operates on
+the current repository (mounting it to both input and output of the transform).  If run from other locations the path to
+the repo root is the first CLI parameter (or we may have to use -r as below?)
+
+Thus running 'hmd bartleby pdf' within $HMD_REPO_HOME/hmd-lib-demo, you'll get the pdf outputs in
+$HMD_REPO_HOME/hmd-lib-demo/target/bartleby
+
+From $HMD_REPO_HOME, one could run 'hmd bartleby -r hmd-lib-demo pdf'.
+
+Note the cli wrapper should do a thorough job of disposing of the temporal container and any associated resources.
