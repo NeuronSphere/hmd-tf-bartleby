@@ -14,7 +14,7 @@ RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
     pip install -r requirements.txt
 
 ENV TRANSFORM_INSTANCE_CONTEXT default
-ENV TRANSFORM_NID default
+ENV NID_CONTEXT default
 
 WORKDIR /app
 COPY entrypoint.py .

@@ -19,7 +19,7 @@ RUN python setup.py sdist bdist_wheel
 RUN pip install -U --no-index --no-deps --force-reinstall --find-links=./dist hmd-tf-bartleby==0.0.1
 
 ENV TRANSFORM_INSTANCE_CONTEXT default
-ENV TRANSFORM_NID default
+ENV NID_CONTEXT default
 
 WORKDIR /app
 COPY entrypoint.py .
