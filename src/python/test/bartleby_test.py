@@ -1,7 +1,4 @@
 import os
-from hmd_tf_bartleby.hmd_tf_bartleby import entry_point
-from unittest.mock import MagicMock, patch
-from testfixtures.popen import MockPopen
 
 
 class TestBartleby:
