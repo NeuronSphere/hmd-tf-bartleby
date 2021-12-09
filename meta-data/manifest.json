@@ -20,8 +20,6 @@
       [
         "docker"
       ]
-    ],
-    "dependencies": {},
-    "default_configuration": {}
+    ]
   }
 }

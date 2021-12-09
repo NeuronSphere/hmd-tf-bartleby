@@ -31,6 +31,6 @@ export HMD_BARTLEBY_HOME="$HMD_HOME/bartleby"
 export TRANSFORM_INSTANCE_CONTEXT=$SPHINX_CMD
 export HMD_DOC_REPO_NAME=$1
 export HMD_DOC_REPO_VERSION="0.1"
-#export AUTODOC=True
+export AUTODOC=True
 
 docker compose --file ./src/docker/docker-compose.yaml up

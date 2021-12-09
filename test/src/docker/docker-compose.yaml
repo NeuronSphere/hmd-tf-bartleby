@@ -21,25 +21,13 @@ services:
     volumes:
       - type: bind
         source: "${REPO_FOLDER}/docs"
-        target: "/hmd_transform/input/$1"
+        target: /hmd_transform/input
       - type: bind
         source: "${REPO_FOLDER}/target/bartleby"
-        target: "/hmd_transform/output/$1"
+        target: /hmd_transform/output
       - type: bind
         source: "${REPO_FOLDER}/src/python"
-        target: "/code/src/python/$1"
-      - type: bind
-        source: "$[HMD_REPO_HOME}/hmd-tf-bartleby/target/gather"
-        target: /hmd_transform/output/gather
-      - type: bind
-        source: "${HMD_REPO_HOME}/hmd-ms-transform/docs"
-        target: /hmd_transform/input/hmd-ms-transform
-      - type: bind
-        source: "${HMD_REPO_HOME}/hmd-ms-transform/target/bartleby"
-        target: /hmd_transform/output/hmd-ms-transform
-      - type: bind
-        source: "${HMD_REPO_HOME}/hmd-ms-transform/src/python"
-        target: /code/src/python/hmd-ms-transform
+        target: /code/src/python
     secrets:
       - pip_username
       - pip_password

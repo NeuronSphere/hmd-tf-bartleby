@@ -6,8 +6,6 @@ import os
 import json
 from pathlib import Path
 from subprocess import run
-import urllib.parse
-from pip._vendor import pkg_resources
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -30,30 +28,44 @@ def entry_point():
     )
     nid_context = os.environ.get("NID_CONTEXT")
 
-    def get_index(path: Path, tmpdir):
+    repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 
-        text = []
+    def install_doc_repo(tmpdir):
+        logger.info(f"Installing {repo_name} package to allow import..")
+        path = Path(tmpdir) / "packages"
+        with open(Path(os.environ.get("PIP_USERNAME")), "r") as secret:
+            pip_username = secret.readline()
+        with open(Path(os.environ.get("PIP_PASSWORD")), "r") as secret:
+            pip_password = secret.readline()
+        if pip_username and pip_password:
+            install = run(
+                [
+                    "pip",
+                    "install",
+                    "--extra-index-url",
+                    f"https://{pip_username}:{pip_password}@hmdlabs.jfrog.io/artifactory/api/pypi/hmd_pypi/simple",
+                    "--target",
+                    path,
+                    repo_name,
+                ]
+            )
+            logger.info(
+                f"Install process completed with exit code: {install.returncode}"
+            )
+        else:
+            raise Exception("Autodoc requires pip credentials as secrets.")
+
+    def get_index(path: Path):
+
         with path.open("r") as index:
             text = index.readlines()
             i = [text.index(x) for x in text if x == "Indices and tables\n"][0]
-            text.insert(i, ".. autosummary::\n   :toctree: modules\n\n")
-            mods = get_modules(tmpdir)
-            mod_string = "".join(mods)
-            text.insert(i + 1, f"{mod_string}\n")
+            text.insert(
+                i,
+                f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {repo_name.replace('-', '_')}\n\n",
+            )
             logger.info(f"new text: {text}")
         return text
-
-    def get_modules(tmpdir):
-        logger.info("Getting modules..")
-        mods = []
-        for root, dirs, files in os.walk("/code/src/python"):
-            if "__init__.py" in files:
-                files.remove("__init__.py")
-                for file in files:
-                    mods.append(
-                        f"   {os.path.join(root, file).replace('/code/src/python/', '').replace('/', '.').replace('.py', '')}\n"
-                    )
-        return mods
 
     def add_modules_to_index(path: Path):
 
@@ -62,13 +74,13 @@ def entry_point():
             for file in os.scandir(path)
             if os.path.basename(Path(file)) == "index.rst"
         ]
-        logger.info("Index found..")
         if Path(index[0]).exists():
-            text = get_index(Path(index[0]), path)
+            logger.info("Index found..")
+            text = get_index(Path(index[0]))
             with Path(index[0]).open("w") as index:
                 index.writelines(text)
 
-    def do_transform(repo_docs: Path):
+    def do_transform():
 
         with tempfile.TemporaryDirectory() as tmpdir:
             logger.info("Copying sphinx config files..")
@@ -79,11 +91,14 @@ def entry_point():
             )
             logger.info("Copying raw docs..")
             shutil.copytree(
-                src=repo_docs, dst=os.path.join(tmpdir, "source"), dirs_exist_ok=True
+                src=input_content_path,
+                dst=os.path.join(tmpdir, "source"),
+                dirs_exist_ok=True,
             )
 
             autodoc = os.environ.get("AUTODOC")
             if autodoc:
+                install_doc_repo(tmpdir)
                 logger.info("Adding modules to index..")
                 add_modules_to_index(Path(os.path.join(tmpdir, "source")))
 
@@ -110,6 +125,6 @@ def entry_point():
         logger.info(f"nid_context: {nid_context}")
         logger.info(f"Transform_instance_context: {transform_instance_context}")
 
-    input_contents = [x for x in os.listdir(input_content_path)]
+    # install_doc_repo()
     do_transform()
     logger.info("Transform complete.")

@@ -13,7 +13,10 @@
 import os
 import sys
 
-sys.path.insert(0, '/code/src/python')
+sys.path.insert(0, os.path.abspath('../packages'))
+# sys.path.insert(0, '/code/src/python')
+# sys.path.insert(0, '/code/packages')
+print(sys.path)
 
 # -- Project information -----------------------------------------------------
 company_name_acronym = 'HMD'
@@ -21,7 +24,7 @@ repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 repo_version = os.environ.get("HMD_DOC_REPO_VERSION")
 project = '{} Labs project: {}'.format(company_name_acronym, repo_name)
 copyright = '2021, {} Labs'.format(company_name_acronym)
-author = 'Bartleby the scrivener'
+author = '{} Labs'.format(company_name_acronym)
 
 # The full version, including alpha/beta/rc tags
 release = repo_version
@@ -47,7 +50,7 @@ autodoc_default_options = {
     'imported_members': False
 }
 
-# autodoc_mock_imports = [
+# autosummary_mock_imports = [
 #     "hmd_lang_librarian",
 #     "hmd_graphql_client",
 #     "hmd_schema_loader",
@@ -66,6 +69,8 @@ autodoc_default_options = {
 
 # autodoc check for signatures within source code
 autodoc_docstring_signature = True
+
+autosummary_generate = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

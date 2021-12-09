@@ -12,6 +12,8 @@ RUN curl -L "https://sourceforge.net/projects/plantuml/files/1.2021.14/plantuml.
 
 RUN apt install -y default-jre
 
+RUN apt install -y libpq-dev python3-dev postgresql gcc
+
 RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
     pip install -r requirements.txt
 
