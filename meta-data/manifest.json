@@ -16,10 +16,5 @@
     ]
   },
   "deploy": {
-    "commands": [
-      [
-        "docker"
-      ]
-    ]
   }
 }
