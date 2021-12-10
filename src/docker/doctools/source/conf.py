@@ -88,5 +88,6 @@ latex_theme = 'howto'
 
 # other elements used in latex pdf generation
 latex_elements = {
+    'preamble': r'\usepackage{enumitem}\setlistdepth{99}',
     'atendofbody': 'HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.'
 }
