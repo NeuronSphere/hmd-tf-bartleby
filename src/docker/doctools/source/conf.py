@@ -14,9 +14,6 @@ import os
 import sys
 
 sys.path.insert(0, os.path.abspath('../packages'))
-# sys.path.insert(0, '/code/src/python')
-# sys.path.insert(0, '/code/packages')
-print(sys.path)
 
 # -- Project information -----------------------------------------------------
 company_name_acronym = 'HMD'
@@ -42,7 +39,7 @@ extensions = [
     'sphinx.ext.autosummary'
 ]
 
-# autodoc default options
+
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
@@ -51,20 +48,6 @@ autodoc_default_options = {
 }
 
 # autosummary_mock_imports = [
-#     "hmd_lang_librarian",
-#     "hmd_graphql_client",
-#     "hmd_schema_loader",
-#     "hmd_meta_types",
-#     "hmd_lang_device",
-#     "hmd_lang_device_librarian",
-#     "hmd_lang_case",
-#     "boto3",
-#     "hmd_lib_librarian_client",
-#     "hmd_entity_storage",
-#     "hmd_lib_naming",
-#     "hmd_cli_tools",
-#     "hmd_graphql",
-#     "hmd_lang_naming"
 # ]
 
 # autodoc check for signatures within source code

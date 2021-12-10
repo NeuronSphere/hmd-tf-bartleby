@@ -17,7 +17,7 @@ Context:
     - Default: Blank (displays the Sphinx help menu for the 'make' command)
     - Custom: input supplied as an argument in the CLI
 
-    *Configured options*: html, latexpdf
+    *Configured options*: html, pdf
 
 #. NID_CONTEXT: the entity identifier from the global graph database for the ``repo_instance`` where a bartleby
    transform is needed. This also includes the ``transform_instance`` identifier that is used to upsert relationship(s)
@@ -112,8 +112,8 @@ Project Structure:
         already been built and does not need to be executed again. The ``--settag`` parameters will force tags onto each
         of the executed test cases within the suite to ensure all cases are properly labeled with standard HMD variables.
 
-    - *run_bartleby_local.sh*: script used to build and run the bartleby transform locally (to be replaced by bartleby
-      CLI); run the script as follows:
+    - *run_bartleby_local.sh*: script used to build and run the bartleby transform locally (replaced by bartleby
+      CLI - see ``hmd-cli-bartleby``); run the script as follows:
 
         .. code-block:: bash
 

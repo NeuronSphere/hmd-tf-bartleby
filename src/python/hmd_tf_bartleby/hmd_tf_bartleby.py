@@ -29,14 +29,20 @@ def entry_point():
     nid_context = os.environ.get("NID_CONTEXT")
 
     repo_name = os.environ.get("HMD_DOC_REPO_NAME")
+    pip_user = os.environ.get("PIP_USERNAME")
+    pip_pwd = os.environ.get("PIP_PASSWORD")
 
     def install_doc_repo(tmpdir):
         logger.info(f"Installing {repo_name} package to allow import..")
         path = Path(tmpdir) / "packages"
-        with open(Path(os.environ.get("PIP_USERNAME")), "r") as secret:
-            pip_username = secret.readline()
-        with open(Path(os.environ.get("PIP_PASSWORD")), "r") as secret:
-            pip_password = secret.readline()
+        if Path(pip_user).exists() and Path(pip_pwd).exists():
+            with open(Path(pip_user), "r") as secret:
+                pip_username = secret.readline()
+            with open(Path(pip_pwd), "r") as secret:
+                pip_password = secret.readline()
+        else:
+            pip_username = pip_user
+            pip_password = pip_pwd
         if pip_username and pip_password:
             install = run(
                 [
@@ -64,10 +70,9 @@ def entry_point():
                 i,
                 f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {repo_name.replace('-', '_')}\n\n",
             )
-            logger.info(f"new text: {text}")
         return text
 
-    def add_modules_to_index(path: Path):
+    def add_package_to_index(path: Path):
 
         index = [
             file
@@ -99,8 +104,8 @@ def entry_point():
             autodoc = os.environ.get("AUTODOC")
             if autodoc:
                 install_doc_repo(tmpdir)
-                logger.info("Adding modules to index..")
-                add_modules_to_index(Path(os.path.join(tmpdir, "source")))
+                logger.info("Adding package to index..")
+                add_package_to_index(Path(os.path.join(tmpdir, "source")))
 
             logger.info(f"Executing: make {transform_instance_context['shell']}")
             cmd_ar = ["make"]
