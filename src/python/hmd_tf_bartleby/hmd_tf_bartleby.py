@@ -6,6 +6,7 @@ import os
 import json
 from pathlib import Path
 from subprocess import run
+import urllib
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -49,7 +50,7 @@ def entry_point():
                     "pip",
                     "install",
                     "--extra-index-url",
-                    f"https://{pip_username}:{pip_password}@hmdlabs.jfrog.io/artifactory/api/pypi/hmd_pypi/simple",
+                    f"https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdlabs.jfrog.io/artifactory/api/pypi/hmd_pypi/simple",
                     "--target",
                     path,
                     repo_name,

@@ -40,7 +40,7 @@ Load Environment Variables
 
 Do transform
     [Documentation]    Run transform container with expected volume mounts and env variables
-    Run Process    docker    compose    --file    ./test_suite/docker-compose.yaml    up    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
+    Run Process    docker-compose    --file    ./test_suite/docker-compose.yaml    up    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
     ${result}=    Get Process Result    runtransform
     Log    ${result.stdout}
     Should be equal    ${result.rc}    ${0}

@@ -4,6 +4,13 @@
 *.pyc
 imports/
 __pycache__/
+src/python/build
+test/instance_configuration.yaml
+test/*.html
+test/*.xml
+test/src/docker/doctools/
+test/src/docker/python/hmd_tf_bartleby/
+bender/
 
 # Logs
 logs
