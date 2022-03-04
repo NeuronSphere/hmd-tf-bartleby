@@ -92,15 +92,19 @@ latex_theme = 'howto'
 # other elements used in latex pdf generation
 latex_elements = {
     'preamble': r'\usepackage{enumitem}\setlistdepth{99}',
-    'atendofbody': 'HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.'
+    'makeindex': r'\usepackage[columns=1]{idxlayout}\makeindex',
+    'atendofbody': 'HMD Labs Confidential – This document contains information that is confidential and proprietary. '
+                   'Neither this document nor the information herein may be reproduced, used, or disclosed to or for the '
+                   'benefit of any third party without the prior written consent of HMD Labs.',
 }
+# 'sphinxsetup': r'TitleColor=\definecolor{navy}{rgb}{0,0,128}',
 # latex_documents = [(
 #     "index",
 #     f"{project.replace(' ', '')}_{release}.pdf",
 #     project,
 #     author,
 #     "howto",
-#     True
+#     False
 # )]
 
 latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh_Short.jpg"

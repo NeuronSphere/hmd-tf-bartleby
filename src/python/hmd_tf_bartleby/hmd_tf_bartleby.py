@@ -5,8 +5,7 @@ import sys
 import os
 import json
 from pathlib import Path
-from subprocess import run
-import urllib
+from subprocess import run, STDOUT
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -30,32 +29,17 @@ def entry_point():
     nid_context = os.environ.get("NID_CONTEXT")
 
     repo_name = os.environ.get("HMD_DOC_REPO_NAME")
-    pip_user = os.environ.get("PIP_USERNAME")
-    pip_pwd = os.environ.get("PIP_PASSWORD")
+    pip_conf = os.environ.get("PIP_CONF")
 
     def install_doc_repo(tmpdir, name):
         logger.info(f"Installing {name} package to allow import..")
         path = Path(tmpdir) / "packages"
-        if Path(pip_user).exists() and Path(pip_pwd).exists():
-            with open(Path(pip_user), "r") as secret:
-                pip_username = secret.readline()
-            with open(Path(pip_pwd), "r") as secret:
-                pip_password = secret.readline()
-        else:
-            pip_username = pip_user
-            pip_password = pip_pwd
-        if pip_username and pip_password:
-            install = run(
-                [
-                    "pip",
-                    "install",
-                    "--extra-index-url",
-                    f"https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdlabs.jfrog.io/artifactory/api/pypi/hmd_pypi/simple",
-                    "--target",
-                    path,
-                    name,
-                ]
-            )
+        if Path(pip_conf).exists():
+            pip_path = os.path.join(Path.home(), ".pip")
+            if not Path(pip_path).exists():
+                os.makedirs(pip_path)
+                shutil.copyfile(pip_conf, Path.home() / ".pip" / "pip.conf")
+            install = run(["pip", "install", "--target", path, name])
             logger.info(
                 f"Install process completed with exit code: {install.returncode}"
             )
@@ -121,11 +105,16 @@ def entry_point():
                         Path(os.path.join(tmpdir, "source")), repo_name
                     )
 
+            log_path = output_content_path / "logs"
+            os.makedirs(log_path, exist_ok=True)
+            log_file = log_path / f"{transform_instance_context['shell']}.log"
+
             logger.info(f"Executing: make {transform_instance_context['shell']}")
             cmd_ar = ["make"]
             if transform_instance_context["shell"] != "default":
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))
-            sphinx = run(cmd_ar, text=True, cwd=tmpdir)
+            with open(log_file, "w") as log:
+                sphinx = run(cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log)
 
             if Path(os.path.join(tmpdir, "build")).exists():
                 logger.info("Copying generated docs..")
@@ -139,7 +128,11 @@ def entry_point():
 
             shutil.rmtree(tmpdir)
 
-        logger.info(f"Process completed with exit code: {sphinx.returncode}")
+        logger.info(
+            f"Process completed with exit code: {sphinx.returncode}\n"
+            f"Log file is available in the following location: "
+            f"./target/bartleby/{transform_instance_context['shell']}.log"
+        )
 
         logger.info(f"nid_context: {nid_context}")
         logger.info(f"Transform_instance_context: {transform_instance_context}")
