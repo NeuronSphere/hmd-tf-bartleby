@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import datetime
 
 sys.path.insert(0, os.path.abspath('../packages'))
 
@@ -19,13 +20,14 @@ sys.path.insert(0, os.path.abspath('../packages'))
 company_name_acronym = 'HMD'
 repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 repo_version = os.environ.get("HMD_DOC_REPO_VERSION")
-project = '{} Labs project: {}'.format(company_name_acronym, repo_name)
-copyright = '2021, {} Labs'.format(company_name_acronym)
+if repo_name.split(",") == 1:
+    project = 'NeuronSphere project: {}'.format(repo_name)
+    release = repo_version
+else:
+    project = 'NeuronSphere projects'.format(repo_name)
+    release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
+copyright = '{}, {} Labs'.format(datetime.date.today().year, company_name_acronym)
 author = '{} Labs'.format(company_name_acronym)
-
-# The full version, including alpha/beta/rc tags
-release = repo_version
-
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,8 +49,7 @@ autodoc_default_options = {
     'imported_members': False
 }
 
-# autosummary_mock_imports = [
-# ]
+autodoc_member_order = "bysource"
 
 # autodoc check for signatures within source code
 autodoc_docstring_signature = True
@@ -78,6 +79,8 @@ html_theme = 'alabaster'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh_Short.jpg"
+html_short_title = project.replace("NeuronSphere", "NS")
 
 # -- Options for LaTeX output -------------------------------------------------
 
@@ -91,3 +94,13 @@ latex_elements = {
     'preamble': r'\usepackage{enumitem}\setlistdepth{99}',
     'atendofbody': 'HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.'
 }
+# latex_documents = [(
+#     "index",
+#     f"{project.replace(' ', '')}_{release}.pdf",
+#     project,
+#     author,
+#     "howto",
+#     True
+# )]
+
+latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh_Short.jpg"

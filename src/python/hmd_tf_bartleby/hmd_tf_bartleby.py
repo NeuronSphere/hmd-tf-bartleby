@@ -33,8 +33,8 @@ def entry_point():
     pip_user = os.environ.get("PIP_USERNAME")
     pip_pwd = os.environ.get("PIP_PASSWORD")
 
-    def install_doc_repo(tmpdir):
-        logger.info(f"Installing {repo_name} package to allow import..")
+    def install_doc_repo(tmpdir, name):
+        logger.info(f"Installing {name} package to allow import..")
         path = Path(tmpdir) / "packages"
         if Path(pip_user).exists() and Path(pip_pwd).exists():
             with open(Path(pip_user), "r") as secret:
@@ -53,7 +53,7 @@ def entry_point():
                     f"https://{pip_username}:{urllib.parse.quote(pip_password)}@hmdlabs.jfrog.io/artifactory/api/pypi/hmd_pypi/simple",
                     "--target",
                     path,
-                    repo_name,
+                    name,
                 ]
             )
             logger.info(
@@ -62,18 +62,20 @@ def entry_point():
         else:
             raise Exception("Autodoc requires pip credentials as secrets.")
 
-    def get_index(path: Path):
+    def get_index(path: Path, name, trunc=False):
 
         with path.open("r") as index:
             text = index.readlines()
             i = [text.index(x) for x in text if x == "Indices and tables\n"][0]
             text.insert(
                 i,
-                f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {repo_name.replace('-', '_')}\n\n",
+                f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {name.replace('-', '_')}\n\n",
             )
+            if trunc:
+                del text[i + 1 :]
         return text
 
-    def add_package_to_index(path: Path):
+    def add_package_to_index(path: Path, name, trunc=False):
 
         index = [
             file
@@ -82,7 +84,7 @@ def entry_point():
         ]
         if Path(index[0]).exists():
             logger.info("Index found..")
-            text = get_index(Path(index[0]))
+            text = get_index(Path(index[0]), name, trunc)
             with Path(index[0]).open("w") as index:
                 index.writelines(text)
 
@@ -104,9 +106,20 @@ def entry_point():
 
             autodoc = os.environ.get("AUTODOC")
             if autodoc:
-                install_doc_repo(tmpdir)
-                logger.info("Adding package to index..")
-                add_package_to_index(Path(os.path.join(tmpdir, "source")))
+                names = repo_name.split(",")
+                if len(names) > 1:
+                    for name in names:
+                        install_doc_repo(tmpdir, name)
+                        logger.info("Adding package to index..")
+                        add_package_to_index(
+                            Path(os.path.join(tmpdir, "source", name)), name, True
+                        )
+                else:
+                    install_doc_repo(tmpdir, repo_name)
+                    logger.info("Adding package to index..")
+                    add_package_to_index(
+                        Path(os.path.join(tmpdir, "source")), repo_name
+                    )
 
             logger.info(f"Executing: make {transform_instance_context['shell']}")
             cmd_ar = ["make"]
