@@ -20,9 +20,13 @@ RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
 RUN python setup.py sdist bdist_wheel
 RUN pip install -U --no-index --no-deps --force-reinstall --find-links=./dist hmd-tf-bartleby==0.0.1
 
+#COPY __init__.py /usr/local/lib/python3.10/site-packages/sphinx/ext/autodoc/
+
 ENV TRANSFORM_INSTANCE_CONTEXT default
 ENV NID_CONTEXT default
 
 WORKDIR /app
 COPY entrypoint.py .
-ENTRYPOINT [ "python", "entrypoint.py" ]
+COPY entry_puml.py .
+
+CMD [ "python", "entrypoint.py" ]

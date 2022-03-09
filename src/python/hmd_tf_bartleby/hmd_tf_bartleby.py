@@ -6,6 +6,8 @@ import os
 import json
 from pathlib import Path
 from subprocess import run, STDOUT
+from typing import List
+from hmd_cli_tools.hmd_cli_tools import cd
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -15,6 +17,25 @@ logging.basicConfig(
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+
+def render_puml(files: List[str]):
+    input_content_path = Path("/hmd_transform/input")
+    output_content_path = Path("/hmd_transform/output")
+    with cd(input_content_path):
+        for file in files:
+            command = [
+                "java",
+                "-jar",
+                "/usr/local/bin/plantuml.jar",
+                "-o",
+                output_content_path,
+                file,
+            ]
+            process = run(command)
+            if process.returncode != 0:
+                raise Exception(f"Puml generation failed for {file}")
+    logger.info("Puml generation completed.")
 
 
 def entry_point():

@@ -15,10 +15,11 @@ RUN apt install -y libpq-dev python3-dev postgresql gcc
 RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
     pip install -r requirements.txt
 
-ENV TRANSFORM_INSTANCE_CONTEXT default
+ENV TRANSFORM_INSTANCE_CONTEXT {\"shell\": \"default\"}
 ENV NID_CONTEXT default
 
 WORKDIR /app
 COPY entrypoint.py .
+COPY entry_puml.py .
 
 ENTRYPOINT [ "python", "entrypoint.py" ]

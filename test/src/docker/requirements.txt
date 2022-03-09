@@ -3,3 +3,4 @@ sphinx-jsonschema
 sphinx-inline-tabs
 when-changed==0.3.0
 sphinxcontrib-plantuml
+hmd-cli-tools
