@@ -22,4 +22,4 @@ WORKDIR /app
 COPY entrypoint.py .
 COPY entry_puml.py .
 
-ENTRYPOINT [ "python", "entrypoint.py" ]
+CMD [ "python", "entrypoint.py" ]
