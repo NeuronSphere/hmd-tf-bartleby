@@ -55,17 +55,18 @@ def entry_point():
     def install_doc_repo(tmpdir, name):
         logger.info(f"Installing {name} package to allow import..")
         path = Path(tmpdir) / "packages"
-        if Path(pip_conf).exists():
-            pip_path = os.path.join(Path.home(), ".pip")
-            if not Path(pip_path).exists():
-                os.makedirs(pip_path)
-                shutil.copyfile(pip_conf, Path.home() / ".pip" / "pip.conf")
-            install = run(["pip", "install", "--target", path, name])
-            logger.info(
-                f"Install process completed with exit code: {install.returncode}"
-            )
-        else:
-            raise Exception("Autodoc requires pip credentials as secrets.")
+        if pip_conf:
+            if Path(pip_conf).exists():
+                pip_path = os.path.join(Path.home(), ".pip")
+                if not Path(pip_path).exists():
+                    os.makedirs(pip_path)
+                    shutil.copyfile(pip_conf, Path.home() / ".pip" / "pip.conf")
+                install = run(["pip", "install", "--target", path, name])
+                logger.info(
+                    f"Install process completed with exit code: {install.returncode}"
+                )
+            else:
+                raise Exception("Autodoc requires pip credentials as secrets.")
 
     def get_index(path: Path, name, trunc=False):
 
