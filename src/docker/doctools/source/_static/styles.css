@@ -1,0 +1,12 @@
+@font-face {
+    font-family: "Source Sans Pro";
+    src: url("./SourceSansPro/SourceSansPro-Regular.ttf");
+}
+@font-face {
+    font-family: "Source Sans Pro Bold";
+    src: url("./SourceSansPro/SourceSansPro-Bold.ttf");
+}
+@font-face {
+    font-family: "Source Sans Pro Italic";
+    src: url("./SourceSansPro/SourceSansPro-Italic.ttf");
+}

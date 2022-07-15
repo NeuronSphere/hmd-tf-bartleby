@@ -4,13 +4,10 @@ FROM sphinxdoc/sphinx-latexpdf
 COPY doctools /hmd_transform/doctools
 COPY requirements.txt .
 
-RUN apt-get update
-RUN apt install -y curl
+RUN apt-get update && apt install -y curl
 RUN curl -L "https://sourceforge.net/projects/plantuml/files/1.2021.14/plantuml.1.2021.14.jar/download" -o /usr/local/bin/plantuml.jar
 
-RUN apt install -y default-jre
-
-RUN apt install -y libpq-dev python3-dev postgresql gcc
+RUN apt install -y default-jre libpq-dev python3-dev postgresql gcc
 
 RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
     pip install -r requirements.txt

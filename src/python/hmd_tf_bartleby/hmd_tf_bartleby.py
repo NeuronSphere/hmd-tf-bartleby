@@ -72,11 +72,18 @@ def entry_point():
 
         with path.open("r") as index:
             text = index.readlines()
-            i = [text.index(x) for x in text if x == "Indices and tables\n"][0]
-            text.insert(
-                i,
-                f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {name.replace('-', '_')}\n\n",
-            )
+            name = name.replace("-", "_")
+            i = [text.index(x) for x in text if name in x]
+            if len(i) > 0:
+                i = i[0]
+                text.insert(i, f".. autosummary::\n   :toctree: _autosummary\n\n")
+                i = [text.index(x) for x in text if x == "Indexes and tables\n"][0]
+            else:
+                i = [text.index(x) for x in text if x == "Indexes and tables\n"][0]
+                text.insert(
+                    i,
+                    f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {name}\n\n",
+                )
             if trunc:
                 del text[i + 1 :]
         return text

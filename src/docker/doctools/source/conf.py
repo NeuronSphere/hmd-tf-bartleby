@@ -13,6 +13,9 @@
 import os
 import sys
 import datetime
+from importlib import import_module
+import inspect
+import ast
 
 sys.path.insert(0, os.path.abspath('../packages'))
 
@@ -21,7 +24,7 @@ company_name_acronym = 'HMD'
 repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 repo_version = os.environ.get("HMD_DOC_REPO_VERSION")
 if len(repo_name.split(",")) == 1:
-    project = 'NeuronSphere project: {}'.format(repo_name)
+    project = 'NeuronSphere component: \n{}'.format(repo_name)
     release = repo_version
 else:
     project = 'NeuronSphere projects'
@@ -45,8 +48,9 @@ extensions = [
 autodoc_default_options = {
     'members': True,
     'undoc-members': True,
-    'private_members': True,
-    'imported_members': False,
+    'private-members': False,
+    'imported-members': False,
+    'exclude-members': '__init__',
     'member-order': 'bysource'
 }
 
@@ -58,16 +62,76 @@ autosummary_generate = True
 
 # docstring processing
 def extra_processing(app, what, name, obj, options, lines):
-    pass
+    mod_name = repo_name.replace('-', '_')
+    module = import_module(f"{mod_name}.{mod_name}")
+    if hasattr(module, "setup"):
+        setup = getattr(module, "setup")
+    else:
+        return lines
+    custom_ops = dict(
+        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+    )
+    for op in custom_ops:
+        decs = custom_ops[op].decorator_list
+        decs_dict = {}
+        for dec in decs:
+            kws = dec.keywords
+            kw_dict = {}
+            for kw in kws:
+                if kw.arg == 'rest_path':
+                    kw_dict.update({kw.arg: ast.parse(kw.value).value})
+                elif kw.arg == 'rest_methods':
+                    try:
+                        kw_dict.update({kw.arg: ast.parse(kw.value).elts[0].value})
+                    except Exception as e:
+                        pass
+                elif kw.arg == 'args':
+                    try:
+                        kw_dict.update(
+                            {kw.arg: {ast.parse(kw.value).keys[0].value: ast.parse(kw.value).values[0].value}}
+                        )
+                    except Exception as e:
+                        pass
+            decs_dict.update({op: kw_dict})
+        if op == method_name and len(decs_dict.get(op)) > 0:
+            lines.insert(0, f"{decs_dict[op]}")
+            lines.insert(1, "")
+    return lines
 
 
+# signature processing - used to identify which methods are being processed for the docstring processing (method_name)
 def signature_processing(app, what, name, obj, options, signature, return_annotation):
-    pass
+    global method_name
+    method_name = name.split('.')[len(name.split('.'))-1]
+
+
+# identify members to skip in the autosummary - used for microservices to ensure only the service ops are included
+def skip_members(app, what, name, obj, skip, options):
+    mod_name = repo_name.replace('-', '_')
+    module = import_module(f"{mod_name}.{mod_name}")
+    if hasattr(module, "setup"):
+        setup = getattr(module, "setup")
+    else:
+        return None
+    custom_ops = dict(
+        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+    )
+    svc_ops = []
+    for op in custom_ops:
+        decs = custom_ops[op].decorator_list
+        for dec in decs:
+            kws = dec.keywords
+            if len(kws) == 3:
+                svc_ops.append(op)
+    if name not in svc_ops:
+        return True
 
 
 def setup(app):
+    app.add_stylesheet('styles.css')
     app.connect("autodoc-process-docstring", extra_processing)
     app.connect("autodoc-process-signature", signature_processing)
+    app.connect("autodoc-skip-member", skip_members)
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -98,19 +162,19 @@ html_theme_options = {
     'logo_name': True,
     'page_width': '1100px',
     'sidebar_width': '270px',
-    'sidebar_header': '#191970',
-    'sidebar_link': '#191970',
-    'narrow_sidebar_bg': '#191970',
-    'narrow_sidebar_link': '#ADD8E6',
-    'link': '#191970',
-    'link_hover': '#8B0000',
+    'sidebar_header': '#180075',
+    'sidebar_link': '#180075',
+    'narrow_sidebar_bg': '#180075',
+    'narrow_sidebar_link': '#3DBCD8',
+    'link': '#180075',
+    'link_hover': '#A70B52',
     'show_powered_by': False,
-    'head_font_family': "'Gill Sans Light',sans-serif",
-    'font_family': "'Gill Sans Light',sans-serif",
-    'caption_font_family': "'Gill Sans Light',sans-serif",
-    'pre_bg': '#F0F8FF',
-    'note_bg': '#FFE4E1',
-    'note_border': '#8B0000',
+    'head_font_family': "Source Sans Pro Bold",
+    'font_family': "Source Sans Pro",
+    'caption_font_family': "Source Sans Pro Italic",
+    # 'pre_bg': '#3DBCD8',
+    # 'note_bg': '#FFE4E1',
+    'note_border': '#A70B52',
 }
 
 # -- Options for LaTeX output -------------------------------------------------
@@ -128,4 +192,4 @@ latex_elements = {
     'sphinxsetup': r'VerbatimColor={RGB}{240,248,255}, verbatimwithframe=false, noteBorderColor={RGB}{139,0,0}, InnerLinkColor={RGB}{25,25,112}, TitleColor={RGB}{25,25,112}, HeaderFamily='
 }
 
-latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh_Short.jpg"
+latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
