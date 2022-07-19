@@ -27,7 +27,7 @@ if len(repo_name.split(",")) == 1:
     project = 'NeuronSphere component: \n{}'.format(repo_name)
     release = repo_version
 else:
-    project = 'NeuronSphere projects'
+    project = 'NeuronSphere components'
     release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
 copyright = '{}, {} Labs'.format(datetime.date.today().year, company_name_acronym)
 author = '{} Labs'.format(company_name_acronym)
@@ -62,7 +62,8 @@ autosummary_generate = True
 
 # docstring processing
 def extra_processing(app, what, name, obj, options, lines):
-    mod_name = repo_name.replace('-', '_')
+    repo = name.split('.')[0]
+    mod_name = repo.replace('-', '_')
     module = import_module(f"{mod_name}.{mod_name}")
     if hasattr(module, "setup"):
         setup = getattr(module, "setup")
@@ -79,22 +80,26 @@ def extra_processing(app, what, name, obj, options, lines):
             kw_dict = {}
             for kw in kws:
                 if kw.arg == 'rest_path':
-                    kw_dict.update({kw.arg: ast.parse(kw.value).value})
+                    kw_dict.update({f"**{kw.arg}**": ast.parse(kw.value).value})
                 elif kw.arg == 'rest_methods':
                     try:
-                        kw_dict.update({kw.arg: ast.parse(kw.value).elts[0].value})
+                        kw_dict.update({f"**{kw.arg}**": ast.parse(kw.value).elts[0].value})
                     except Exception as e:
                         pass
                 elif kw.arg == 'args':
                     try:
                         kw_dict.update(
-                            {kw.arg: {ast.parse(kw.value).keys[0].value: ast.parse(kw.value).values[0].value}}
+                            {f"**{kw.arg}**": {ast.parse(kw.value).keys[0].value: ast.parse(kw.value).values[0].value}}
                         )
                     except Exception as e:
                         pass
             decs_dict.update({op: kw_dict})
         if op == method_name and len(decs_dict.get(op)) > 0:
-            lines.insert(0, f"{decs_dict[op]}")
+            decorator = decs_dict[op]
+            new_line = ""
+            for key, value in decorator.items():
+                new_line += f"{key}: *{value}*  "
+            lines.insert(0, new_line)
             lines.insert(1, "")
     return lines
 
@@ -107,28 +112,36 @@ def signature_processing(app, what, name, obj, options, signature, return_annota
 
 # identify members to skip in the autosummary - used for microservices to ensure only the service ops are included
 def skip_members(app, what, name, obj, skip, options):
-    mod_name = repo_name.replace('-', '_')
-    module = import_module(f"{mod_name}.{mod_name}")
-    if hasattr(module, "setup"):
-        setup = getattr(module, "setup")
-    else:
-        return None
-    custom_ops = dict(
-        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
-    )
-    svc_ops = []
-    for op in custom_ops:
-        decs = custom_ops[op].decorator_list
-        for dec in decs:
-            kws = dec.keywords
-            if len(kws) == 3:
-                svc_ops.append(op)
-    if name not in svc_ops:
+    if name == "__init__":
         return True
+    if what == "method":
+        class_name = obj.__qualname__.split('.')[0]
+        if class_name != "object":
+            mod = obj.__module__
+            if mod:
+                repo = mod.split('.')[0]
+                mod_name = repo.replace('-', '_')
+                module = import_module(f"{mod_name}.{mod_name}")
+                if hasattr(module, "setup"):
+                    setup = getattr(module, "setup")
+                else:
+                    return None
+                custom_ops = dict(
+                    [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+                )
+                svc_ops = []
+                for op in custom_ops:
+                    decs = custom_ops[op].decorator_list
+                    for dec in decs:
+                        kws = dec.keywords
+                        if len(kws) == 3:
+                            svc_ops.append(op)
+                if name not in svc_ops:
+                    return True
 
 
 def setup(app):
-    app.add_stylesheet('styles.css')
+    app.add_css_file('styles.css')
     app.connect("autodoc-process-docstring", extra_processing)
     app.connect("autodoc-process-signature", signature_processing)
     app.connect("autodoc-skip-member", skip_members)
@@ -186,10 +199,11 @@ latex_theme = 'howto'
 
 # other elements used in latex pdf generation
 latex_elements = {
+    'figure_align': 'H',
     'preamble': r'\usepackage{enumitem}\setlistdepth{99}\usepackage{charter}\usepackage[defaultsans]{lato}\usepackage{inconsolata}\setlength{\fboxsep}{6pt}',
     'makeindex': r'\usepackage[columns=1]{idxlayout}\makeindex',
     'atendofbody': r'\vspace*{\fill}\textit{HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.}\pagebreak',
-    'sphinxsetup': r'VerbatimColor={RGB}{240,248,255}, verbatimwithframe=false, noteBorderColor={RGB}{139,0,0}, InnerLinkColor={RGB}{25,25,112}, TitleColor={RGB}{25,25,112}, HeaderFamily='
+    'sphinxsetup': r'VerbatimColor={RGB}{235,236,240}, verbatimwithframe=false, noteBorderColor={RGB}{167,11,82}, InnerLinkColor={RGB}{24,0,117}, TitleColor={RGB}{24,0,117}, vmargin={0.75in,0.75in}'
 }
 
 latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"

@@ -1,6 +1,6 @@
 # syntax = docker/dockerfile:1.0-experimental
 
-FROM sphinxdoc/sphinx-latexpdf
+FROM sphinxdoc/sphinx-latexpdf:5.0.2
 COPY doctools /hmd_transform/doctools
 COPY requirements.txt .
 

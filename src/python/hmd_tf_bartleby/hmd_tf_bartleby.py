@@ -85,7 +85,7 @@ def entry_point():
                     f".. autosummary::\n   :toctree: _autosummary\n   :recursive:\n\n   {name}\n\n",
                 )
             if trunc:
-                del text[i + 1 :]
+                del text[i:]
         return text
 
     def add_package_to_index(path: Path, name, trunc=False):
