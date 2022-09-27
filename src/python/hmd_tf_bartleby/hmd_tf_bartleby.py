@@ -8,9 +8,7 @@ from pathlib import Path
 from subprocess import run, STDOUT
 from typing import List
 from hmd_cli_tools.hmd_cli_tools import cd
-from github import Github
-from git import Repo
-from importlib.metadata import version
+
 
 logging.basicConfig(
     stream=sys.stdout,
@@ -120,7 +118,7 @@ def entry_point():
                 dirs_exist_ok=True,
             )
 
-            autodoc = os.environ.get("AUTODOC")
+            autodoc = bool(os.environ.get("AUTODOC"))
             if autodoc:
                 names = repo_name.split(",")
                 if len(names) > 1:
@@ -172,107 +170,3 @@ def entry_point():
     # install_doc_repo()
     do_transform()
     logger.info("Transform complete.")
-
-
-def consolidate_repos():
-    input_content_path = Path("/hmd_transform/input")
-    output_content_path = Path("/hmd_transform/output")
-    secret_dir = Path("/hmd_transform/secret")
-    secret_name = os.environ.get("GH_SECRET", "GH_TOKEN")
-    secret_path = secret_dir / secret_name
-    logger.info("Starting repository consolidation..")
-
-    def _configure_git():
-        name = f"hmd-tf-bartleby {version('hmd_tf_bartleby')}"
-        run(["git", "config", "--global", "user.name", name])
-        run(["git", "config", "--global", "user.email", "admin@hmdlabs.io"])
-
-    def _retrieve_git_info():
-        if secret_path.exists():
-            with open(secret_path, "r") as sec:
-                token = sec.read().strip()
-        else:
-            raise Exception(f"Path to github secret is not available.")
-
-        path = Path.home() / ".ghpat"
-        with open(path, "w") as gp:
-            gp.writelines(token)
-
-        gh = Github(token, timeout=60)
-        gh_user = gh.get_user()
-        # get source repos
-        hmd = list(filter(lambda org: org.name == "HMDLabs", gh_user.get_orgs()))[0]
-        repos = list(hmd.get_repos())
-        hmd_repos = [
-            {repo.name: repo.clone_url}
-            for repo in repos
-            if repo.name.startswith("hmd-")
-        ]
-        # get escrow repo
-        hmd_escrow = list(
-            filter(lambda org: org.login == "HMDLabs-escrow", gh_user.get_orgs())
-        )[0]
-        escrow_repos = list(hmd_escrow.get_repos())
-        escrow_repo = [
-            {repo.name: repo.clone_url}
-            for repo in escrow_repos
-            if repo.name == "hmd-escrow"
-        ]
-        if len(escrow_repo) != 1:
-            raise Exception(
-                f"{len(escrow_repo)} repositories found for escrow target repo: {escrow_repo}"
-            )
-        return escrow_repo, hmd_repos, token
-
-    def _clone_repos(repo_list: List[dict], target_path: Path):
-        for repo in repo_list:
-            repo_name = list(repo.keys())[0]
-            logger.debug(f"Cloning {repo_name} into {target_path}/{repo_name}..")
-            repo_url = list(repo.values())[0]
-            repo_url = repo_url.split("//")
-            repo_url.insert(1, f"//{token}@")
-            repo_url = "".join(repo_url)
-            Repo.clone_from(repo_url, f"{target_path}/{repo_name}")
-        logger.info(f"HMD repositories cloned into {target_path}.")
-
-    def _cleanup_target(out_path: Path):
-        logger.info("Cleaning up target..")
-        for dir in os.listdir(out_path):
-            if dir.startswith("hmd-"):
-                shutil.rmtree(f"{out_path}/{dir}")
-        logger.info("Target cleaned.")
-
-    _configure_git()
-    escrow_repo, hmd_repos, token = _retrieve_git_info()
-    logger.info(f"{len(hmd_repos)} repositories will be consolidated.")
-
-    escrow_path = f"{output_content_path}/{list(escrow_repo[0].keys())[0]}"
-    _clone_repos(hmd_repos, input_content_path)
-    _clone_repos(escrow_repo, output_content_path)
-    _cleanup_target(Path(escrow_path))
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        for dir in os.listdir(input_content_path):
-            src_path = f"{input_content_path}/{dir}"
-            target_path = f"{tmpdir}/{dir}"
-            shutil.copytree(
-                src_path,
-                target_path,
-                ignore=shutil.ignore_patterns(
-                    ".gitignore", ".git", ".pre-commit-config.yaml", "CHANGELOG.md"
-                ),
-            )
-        logger.info("Copying source repositories to target..")
-        for dir in os.listdir(tmpdir):
-            path = f"{tmpdir}/{dir}"
-            final_path = f"{escrow_path}/{dir}"
-            logger.debug(f"Copying {dir} into {final_path}..")
-            shutil.copytree(path, final_path)
-
-    with cd(escrow_path):
-        logger.info(f"{len(os.listdir('.')) - 2} source repositories will be pushed.")
-        run(["git", "add", "."])
-        run(["git", "commit", "-m", "feat: updates source repositories."])
-        run(["git", "push"])
-
-    logger.info("Consolidation complete.")
