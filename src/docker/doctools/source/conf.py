@@ -16,6 +16,7 @@ import datetime
 from importlib import import_module
 import inspect
 import ast
+from operator import countOf
 
 sys.path.insert(0, os.path.abspath('../packages'))
 
@@ -50,6 +51,7 @@ autodoc_default_options = {
     'undoc-members': True,
     'private-members': False,
     'imported-members': False,
+    'show_inheritance': False,
     'exclude-members': '__init__',
     'member-order': 'bysource'
 }
@@ -119,25 +121,27 @@ def skip_members(app, what, name, obj, skip, options):
         if class_name != "object":
             mod = obj.__module__
             if mod:
-                repo = mod.split('.')[0]
-                mod_name = repo.replace('-', '_')
-                module = import_module(f"{mod_name}.{mod_name}")
-                if hasattr(module, "setup"):
-                    setup = getattr(module, "setup")
-                else:
-                    return None
-                custom_ops = dict(
-                    [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
-                )
-                svc_ops = []
-                for op in custom_ops:
-                    decs = custom_ops[op].decorator_list
-                    for dec in decs:
-                        kws = dec.keywords
-                        if len(kws) == 3:
-                            svc_ops.append(op)
-                if name not in svc_ops:
-                    return True
+                repo = mod.split('.')[0].replace('_', '-')
+                print(repo)
+                if repo == repo_name:
+                    mod_name = repo.replace('-', '_')
+                    module = import_module(f"{mod_name}.{mod_name}")
+                    if hasattr(module, "setup"):
+                        setup = getattr(module, "setup")
+                    else:
+                        return None
+                    custom_ops = dict(
+                        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+                    )
+                    svc_ops = []
+                    for op in custom_ops:
+                        decs = custom_ops[op].decorator_list
+                        for dec in decs:
+                            kws = dec.keywords
+                            if len(kws) == 3:
+                                svc_ops.append(op)
+                    if name not in svc_ops:
+                        return True
 
 
 def setup(app):
