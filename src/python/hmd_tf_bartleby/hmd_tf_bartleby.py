@@ -118,8 +118,8 @@ def entry_point():
                 dirs_exist_ok=True,
             )
 
-            autodoc = bool(os.environ.get("AUTODOC"))
-            if autodoc:
+            autodoc = os.environ.get("AUTODOC")
+            if autodoc == "True":
                 names = repo_name.split(",")
                 if len(names) > 1:
                     for name in names:

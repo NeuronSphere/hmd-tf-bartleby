@@ -94,7 +94,7 @@ def extra_processing(app, what, name, obj, options, lines):
                     except Exception as e:
                         pass
             decs_dict.update({op: kw_dict})
-        if op == method_name and len(decs_dict.get(op)) > 0:
+        if op == method_name and len(decs_dict.get(op, {})) > 0:
             decorator = decs_dict[op]
             new_line = ""
             for key, value in decorator.items():
