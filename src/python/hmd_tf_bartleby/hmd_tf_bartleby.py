@@ -96,6 +96,7 @@ def entry_point():
             for file in os.scandir(path)
             if os.path.basename(Path(file)) == "index.rst"
         ]
+
         if Path(index[0]).exists():
             logger.info("Index found..")
             text = get_index(Path(index[0]), name, trunc)
@@ -103,6 +104,8 @@ def entry_point():
                 index.writelines(text)
 
     def do_transform():
+
+        docs_exists = os.path.exists(input_content_path / "docs")
 
         with tempfile.TemporaryDirectory() as tmpdir:
             logger.info("Copying sphinx config files..")
@@ -113,10 +116,15 @@ def entry_point():
             )
             logger.info("Copying raw docs..")
             shutil.copytree(
-                src=input_content_path,
+                src=input_content_path
+                if not docs_exists
+                else input_content_path / "docs",
                 dst=os.path.join(tmpdir, "source"),
                 dirs_exist_ok=True,
             )
+
+            if docs_exists:
+                shutil.copytree(src=input_content_path, dst=tmpdir, dirs_exist_ok=True)
 
             autodoc = os.environ.get("AUTODOC")
             if autodoc == "True":
@@ -143,6 +151,7 @@ def entry_point():
             cmd_ar = ["make"]
             if transform_instance_context["shell"] != "default":
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))
+
             with open(log_file, "w") as log:
                 sphinx = run(cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log)
 
