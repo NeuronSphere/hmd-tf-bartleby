@@ -114,6 +114,7 @@ def entry_point():
                 dst=tmpdir,
                 dirs_exist_ok=True,
             )
+            logger.info(os.listdir(tmpdir))
             logger.info("Copying raw docs..")
             shutil.copytree(
                 src=input_content_path
