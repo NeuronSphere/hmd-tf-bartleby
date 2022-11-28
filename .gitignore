@@ -143,11 +143,6 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-src/docker/python/requirements.in
-src/docker/python/requirements.txt
-src/docker/python/setup.py
-src/docker/python/hmd_tf_bartleby/__init__.py
-src/docker/python/hmd_tf_bartleby/hmd_tf_bartleby.py
-src/docker/python/test/.gitkeep
-src/docker/python/test/bartleby_test.py
+src/docker/python/
 src/docker/requirements_local.*
+src/docker/meta-data/
