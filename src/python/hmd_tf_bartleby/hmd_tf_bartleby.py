@@ -126,6 +126,13 @@ def entry_point():
             if docs_exists:
                 shutil.copytree(src=input_content_path, dst=tmpdir, dirs_exist_ok=True)
 
+            if os.path.exists(os.path.join(tmpdir, "Makefile")):
+                os.remove(os.path.join(tmpdir, "Makefile"))
+            shutil.copyfile(
+                os.path.join(tmpdir, "HMD_Bartleby_Makefile"),
+                os.path.join(tmpdir, "Makefile"),
+            )
+
             autodoc = os.environ.get("AUTODOC")
             if autodoc == "True":
                 names = repo_name.split(",")
@@ -147,11 +154,11 @@ def entry_point():
             os.makedirs(log_path, exist_ok=True)
             log_file = log_path / f"{transform_instance_context['shell']}.log"
 
-            logger.info(f"Executing: make {transform_instance_context['shell']}")
             cmd_ar = ["make"]
             if transform_instance_context["shell"] != "default":
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))
 
+            logger.info(f"Executing: {cmd_ar}")
             with open(log_file, "w") as log:
                 sphinx = run(cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log)
 
