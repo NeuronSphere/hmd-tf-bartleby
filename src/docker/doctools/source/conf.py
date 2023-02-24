@@ -18,20 +18,20 @@ import inspect
 import ast
 from operator import countOf
 
-sys.path.insert(0, os.path.abspath('../packages'))
+sys.path.insert(0, os.path.abspath("../packages"))
 
 # -- Project information -----------------------------------------------------
-company_name_acronym = 'HMD'
+company_name_acronym = "HMD"
 repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 repo_version = os.environ.get("HMD_DOC_REPO_VERSION")
 if len(repo_name.split(",")) == 1:
-    project = 'NeuronSphere component: \n{}'.format(repo_name)
+    project = "NeuronSphere component: \n{}".format(repo_name)
     release = repo_version
 else:
     project = f'NeuronSphere components: {repo_name}'
     release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
-copyright = '{}, {} Labs'.format(datetime.date.today().year, company_name_acronym)
-author = '{} Labs'.format(company_name_acronym)
+copyright = "{}, {} Labs".format(datetime.date.today().year, company_name_acronym)
+author = "{} Labs".format(company_name_acronym)
 
 # -- General configuration ---------------------------------------------------
 
@@ -45,17 +45,23 @@ extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'nbsphinx'
+    "myst_parser",
 ]
 
+source_suffix = {
+    ".rst": "restructuredtext",
+    ".txt": "markdown",
+    ".md": "markdown",
+}
 
 autodoc_default_options = {
-    'members': True,
-    'undoc-members': True,
-    'private-members': False,
-    'imported-members': False,
-    'show_inheritance': False,
-    'exclude-members': '__init__',
-    'member-order': 'bysource'
+    "members": True,
+    "undoc-members": True,
+    "private-members": False,
+    "imported-members": False,
+    "show_inheritance": False,
+    "exclude-members": "__init__",
+    "member-order": "bysource",
 }
 
 # autodoc check for signatures within source code
@@ -66,15 +72,19 @@ autosummary_generate = True
 
 # docstring processing
 def extra_processing(app, what, name, obj, options, lines):
-    repo = name.split('.')[0]
-    mod_name = repo.replace('-', '_')
+    repo = name.split(".")[0]
+    mod_name = repo.replace("-", "_")
     module = import_module(f"{mod_name}.{mod_name}")
     if hasattr(module, "setup"):
         setup = getattr(module, "setup")
     else:
         return lines
     custom_ops = dict(
-        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+        [
+            [x.name, x]
+            for x in ast.walk(ast.parse(inspect.getsource(setup)))
+            if type(x).__name__ == "FunctionDef"
+        ]
     )
     for op in custom_ops:
         decs = custom_ops[op].decorator_list
@@ -83,17 +93,27 @@ def extra_processing(app, what, name, obj, options, lines):
             kws = dec.keywords
             kw_dict = {}
             for kw in kws:
-                if kw.arg == 'rest_path':
+                if kw.arg == "rest_path":
                     kw_dict.update({f"**{kw.arg}**": ast.parse(kw.value).value})
-                elif kw.arg == 'rest_methods':
-                    try:
-                        kw_dict.update({f"**{kw.arg}**": ast.parse(kw.value).elts[0].value})
-                    except Exception as e:
-                        pass
-                elif kw.arg == 'args':
+                elif kw.arg == "rest_methods":
                     try:
                         kw_dict.update(
-                            {f"**{kw.arg}**": {ast.parse(kw.value).keys[0].value: ast.parse(kw.value).values[0].value}}
+                            {f"**{kw.arg}**": ast.parse(kw.value).elts[0].value}
+                        )
+                    except Exception as e:
+                        pass
+                elif kw.arg == "args":
+                    try:
+                        kw_dict.update(
+                            {
+                                f"**{kw.arg}**": {
+                                    ast.parse(kw.value)
+                                    .keys[0]
+                                    .value: ast.parse(kw.value)
+                                    .values[0]
+                                    .value
+                                }
+                            }
                         )
                     except Exception as e:
                         pass
@@ -111,7 +131,7 @@ def extra_processing(app, what, name, obj, options, lines):
 # signature processing - used to identify which methods are being processed for the docstring processing (method_name)
 def signature_processing(app, what, name, obj, options, signature, return_annotation):
     global method_name
-    method_name = name.split('.')[len(name.split('.'))-1]
+    method_name = name.split(".")[len(name.split(".")) - 1]
 
 
 # identify members to skip in the autosummary - used for microservices to ensure only the service ops are included
@@ -119,21 +139,25 @@ def skip_members(app, what, name, obj, skip, options):
     if name == "__init__":
         return True
     if what == "method":
-        class_name = obj.__qualname__.split('.')[0]
+        class_name = obj.__qualname__.split(".")[0]
         if class_name != "object":
             mod = obj.__module__
             if mod:
-                repo = mod.split('.')[0].replace('_', '-')
+                repo = mod.split(".")[0].replace("_", "-")
                 print(repo)
                 if repo == repo_name:
-                    mod_name = repo.replace('-', '_')
+                    mod_name = repo.replace("-", "_")
                     module = import_module(f"{mod_name}.{mod_name}")
                     if hasattr(module, "setup"):
                         setup = getattr(module, "setup")
                     else:
                         return None
                     custom_ops = dict(
-                        [[x.name, x] for x in ast.walk(ast.parse(inspect.getsource(setup))) if type(x).__name__ == 'FunctionDef']
+                        [
+                            [x.name, x]
+                            for x in ast.walk(ast.parse(inspect.getsource(setup)))
+                            if type(x).__name__ == "FunctionDef"
+                        ]
                     )
                     svc_ops = []
                     for op in custom_ops:
@@ -147,14 +171,14 @@ def skip_members(app, what, name, obj, skip, options):
 
 
 def setup(app):
-    app.add_css_file('styles.css')
+    app.add_css_file("styles.css")
     app.connect("autodoc-process-docstring", extra_processing)
     app.connect("autodoc-process-signature", signature_processing)
     app.connect("autodoc-skip-member", skip_members)
 
 
 # Add any paths that contain templates here, relative to this directory.
-templates_path = ['_templates']
+templates_path = ["_templates"]
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
@@ -162,19 +186,19 @@ templates_path = ['_templates']
 exclude_patterns = []
 
 # path to jar file used for generating puml diagrams
-plantuml = 'java -jar /usr/local/bin/plantuml.jar'
+plantuml = "java -jar /usr/local/bin/plantuml.jar"
 
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'alabaster'
+html_theme = "alabaster"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = ['_static']
+html_static_path = ["_static"]
 # html_logo = f"./{html_static_path[0]}/Neuron_Sphere_Symbol_Color2.png"
 
 # TODO: add option to configure html logo from URL
@@ -196,7 +220,7 @@ html_theme_options = {
     'caption_font_family': "Source Sans Pro Italic",
     # 'pre_bg': '#3DBCD8',
     # 'note_bg': '#FFE4E1',
-    'note_border': '#A70B52',
+    "note_border": "#A70B52",
 }
 
 # -- Options for LaTeX output -------------------------------------------------
@@ -204,7 +228,7 @@ html_theme_options = {
 # The theme to use for LaTeX pages.  See the documentation for
 # a list of builtin themes.
 #
-latex_theme = 'howto'
+latex_theme = "howto"
 
 # other elements used in latex pdf generation
 latex_elements = {

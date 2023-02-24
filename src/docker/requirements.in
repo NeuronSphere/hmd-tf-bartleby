@@ -7,4 +7,4 @@ sphinxcontrib-plantuml==0.23
 hmd-graphql
 nbsphinx
 sphinx-needs
-
+myst-parser

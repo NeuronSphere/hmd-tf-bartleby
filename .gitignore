@@ -143,3 +143,6 @@ dist
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+src/docker/python/
+src/docker/requirements_local.*
+src/docker/meta-data/
