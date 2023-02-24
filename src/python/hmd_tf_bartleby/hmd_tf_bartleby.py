@@ -140,6 +140,7 @@ def entry_point():
             log_file = log_path / f"{transform_instance_context['shell']}.log"
 
             logger.info(f"Executing: make {transform_instance_context['shell']}")
+            # TODO: add option to extend this?
             cmd_ar = ["make"]
             if transform_instance_context["shell"] != "default":
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))

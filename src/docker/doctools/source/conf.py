@@ -28,7 +28,7 @@ if len(repo_name.split(",")) == 1:
     project = 'NeuronSphere component: \n{}'.format(repo_name)
     release = repo_version
 else:
-    project = 'NeuronSphere components'
+    project = f'NeuronSphere components: {repo_name}'
     release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
 copyright = '{}, {} Labs'.format(datetime.date.today().year, company_name_acronym)
 author = '{} Labs'.format(company_name_acronym)
@@ -38,11 +38,13 @@ author = '{} Labs'.format(company_name_acronym)
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
+# TODO: add option to extend this list, along with requirements.txt
 extensions = [
     'sphinx_copybutton',
     'sphinxcontrib.plantuml',
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosummary'
+    'sphinx.ext.autosummary',
+    'nbsphinx'
 ]
 
 
@@ -174,8 +176,11 @@ html_theme = 'alabaster'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 # html_logo = f"./{html_static_path[0]}/Neuron_Sphere_Symbol_Color2.png"
+
+# TODO: add option to configure html logo from URL
+default_html_logo = 'Neuron_Sphere_Logo_RGB_Color.png'
 html_theme_options = {
-    'logo': 'Neuron_Sphere_Logo_RGB_Color.png',
+    'logo': default_html_logo,
     'logo_name': True,
     'page_width': '1100px',
     'sidebar_width': '270px',
@@ -206,8 +211,22 @@ latex_elements = {
     'figure_align': 'H',
     'preamble': r'\usepackage{enumitem}\setlistdepth{99}\usepackage{charter}\usepackage[defaultsans]{lato}\usepackage{inconsolata}\setlength{\fboxsep}{6pt}',
     'makeindex': r'\usepackage[columns=1]{idxlayout}\makeindex',
-    'atendofbody': r'\vspace*{\fill}\textit{HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.}\pagebreak',
     'sphinxsetup': r'VerbatimColor={RGB}{235,236,240}, verbatimwithframe=false, noteBorderColor={RGB}{167,11,82}, InnerLinkColor={RGB}{24,0,117}, TitleColor={RGB}{24,0,117}, vmargin={0.75in,0.75in}'
 }
 
+# TODO: make the content of this env the actual statement (need to find a place to insert into html as well)
+if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
+    # TODO: replace HMD statement with value from env
+    latex_elements['atendofbody'] = r'\vspace*{\fill}\textit{HMD Labs Confidential - This document contains information that is confidential and proprietary. Neither this document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third party without the prior written consent of HMD Labs.}\pagebreak'
+
+
+default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+# TODO: add option to configure pdf logo (from URL, github maybe)
 latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+
+# set document naming
+# TODO: add other options to set title manually or remove timestamp
+doc_name = os.environ.get("DOCUMENT_TITLE", f"{repo_name}-{repo_version}")
+if not os.environ.get("NO_TIMESTAMP_TITLE"):
+    doc_name = doc_name+str(datetime.datetime.now())
+latex_documents = [('index', f'{doc_name}.tex', project, author, 'manual')]

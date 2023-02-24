@@ -1,8 +1,10 @@
-hmd-tf-bartleby==<current>
+hmd-tf-bartleby==0.1.19
 sphinx-copybutton==0.3.1
 sphinx-jsonschema==1.17.2
 sphinx-inline-tabs==2022.1.2b11
 when-changed==0.3.0
 sphinxcontrib-plantuml==0.23
 hmd-graphql
+nbsphinx
+sphinx-needs
 
