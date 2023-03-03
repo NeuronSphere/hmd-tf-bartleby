@@ -5,16 +5,14 @@
   "project_type": {
     "name": "transform"
   },
-  "build": {
-    "commands": [
-      [
-        "python"
-      ],
-      [
-        "docker"
-      ]
-    ]
+  "docker": {
+    "build": {
+      "context_dir": "./",
+      "install_local": true
+    }
   },
-  "deploy": {
-  }
+  "build": {
+    "commands": [["python"], ["docker"]]
+  },
+  "deploy": {}
 }
