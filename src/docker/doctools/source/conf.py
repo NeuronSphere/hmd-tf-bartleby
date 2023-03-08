@@ -238,9 +238,7 @@ latex_elements = {
     "sphinxsetup": r"VerbatimColor={RGB}{235,236,240}, verbatimwithframe=false, noteBorderColor={RGB}{167,11,82}, InnerLinkColor={RGB}{24,0,117}, TitleColor={RGB}{24,0,117}, vmargin={0.75in,0.75in}",
 }
 
-# TODO: make the content of this env the actual statement (need to find a place to insert into html as well)
 if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
-    # TODO: replace HMD statement with value from env
     latex_elements["atendofbody"] = (
         r"\vspace*{\fill}\textit{"
         + os.environ.get("CONFIDENTIALITY_STATEMENT")
