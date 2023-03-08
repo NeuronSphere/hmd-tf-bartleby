@@ -44,7 +44,8 @@ extensions = [
     "sphinxcontrib.plantuml",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "nbsphinx" "myst_parser",
+    "nbsphinx",
+    "myst_parser",
 ]
 
 source_suffix = {

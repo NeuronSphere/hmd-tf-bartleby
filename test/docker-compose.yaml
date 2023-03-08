@@ -1,7 +1,7 @@
 version: "3.2"
 services:
   transform_test:
-    image: ghcr.io/hmdlabs/transform-test:test
+    image: ghcr.io/hmdlabs/hmd-tf-bartleby:${VERSION}
     container_name: transform-test
     environment:
       HMD_INSTANCE_NAME: transform-int-test
@@ -11,14 +11,18 @@ services:
       HMD_REGION: reg1
       HMD_CUSTOMER_CODE: hmd
       HMD_DID: aaa
+      HMD_DOC_REPO_NAME: bartleby-test
+      HMD_DOC_REPO_VERSION: ${VERSION}
       TRANSFORM_INSTANCE_CONTEXT: $TRANSFORM_INSTANCE_CONTEXT
       TRANSFORM_NID: $TRANSFORM_NID
+      CONFIDENTIALITY_STATEMENT: ${CONFIDENTIALITY_STATEMENT}
+      NO_TIMESTAMP_TITLE: "true"
     volumes:
       - type: bind
-        source: "${PWD}/${TRANSFORM_INPUT}"
+        source: "${HMD_REPO_PATH}/${TRANSFORM_INPUT}"
         target: /hmd_transform/input
       - type: bind
-        source: "${PWD}/${TRANSFORM_OUTPUT}"
+        source: "${HMD_REPO_PATH}/${TRANSFORM_OUTPUT}"
         target: /hmd_transform/output
     secrets:
       - my_secret

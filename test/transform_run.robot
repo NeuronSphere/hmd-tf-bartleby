@@ -33,24 +33,27 @@ Setup Transform Test
 Load Environment Variables
     [Documentation]    Loads needed environment variables
     [Arguments]    ${env}
+    Set Environment Variable    VERSION     ${version}
     Set Environment Variable    TRANSFORM_INSTANCE_CONTEXT    ${env}[TRANSFORM_INSTANCE_CONTEXT]
     Set Environment Variable    TRANSFORM_NID    ${env}[TRANSFORM_NID]
     Set Environment Variable    TRANSFORM_INPUT    ${env}[TRANSFORM_INPUT]
     Set Environment Variable    TRANSFORM_OUTPUT    ${env}[TRANSFORM_OUTPUT]
+    Set Environment Variable    CONFIDENTIALITY_STATEMENT   ${env}[CONFIDENTIALITY_STATEMENT]
 
 Do transform
     [Documentation]    Run transform container with expected volume mounts and env variables
-    Run Process    docker-compose    --file    ./test_suite/docker-compose.yaml    up    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
+    Run Process    docker-compose   up    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
     ${result}=    Get Process Result    runtransform
     Log    ${result.stdout}
     Should be equal    ${result.rc}    ${0}
+    Run Process     docker-compose  down
 
 Check output files
     [Documentation]    Verify output file count matches input file count
     [Arguments]    ${env}
-    ${in}=    Count Items In Directory    ${env}[TRANSFORM_INPUT]
-    ${out}=    Count Items In Directory    ${env}[TRANSFORM_OUTPUT]
-    Should be equal    ${in}    ${out}
+    FOR     ${file}     IN      @{env}[output_files]
+        File Should Exist     ${env}[TRANSFORM_OUTPUT]/${file}
+    END
 
 Reset Environment Variables
-    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT
+    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT   VERSION     CONFIDENTIALITY_STATEMENT
