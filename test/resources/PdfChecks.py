@@ -1,4 +1,7 @@
+import re
 from robot.api.deco import keyword, library
+from robot.api import Failure
+from robot.api.logger import logging
 import fitz
 
 
@@ -10,8 +13,18 @@ class PdfChecks:
 
         exists = False
         for page in doc:
-            exists = statement in page.get_text()
+            exists = re.search(statement, page.get_text())
+            logging.info(statement)
+            logging.info(page.get_text())
             if exists:
                 break
 
-        return exists
+        if not exists:
+            raise Failure("Could not find correct confidentiality statement")
+
+    @keyword
+    def should_contain_correct_cover_image(self, filepath: str, logo_path: str):
+        latex = open(filepath, "r").read()
+
+        if not re.search(logo_path, latex):
+            raise Failure("Could not find correct cover image")

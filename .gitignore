@@ -146,4 +146,4 @@ yarn-error.log*
 src/docker/python/
 src/docker/requirements_local.*
 src/docker/meta-data/
-test/output_files1/
+test/output*

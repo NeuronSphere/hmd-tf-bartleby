@@ -14,15 +14,37 @@ Test Bartleby Transform
     [Template]    Test transform
     ${set_one}
     ${set_two}
-
+    
 Confidentiality Statement Exists In PDF
+    [Tags]  confidentiality   dynamic_env
     Test transform  ${confidential_pdf_one}
     Should Contain Confidentiality Statement    ${confidential_pdf_one}[TRANSFORM_OUTPUT]/${confidential_pdf_one}[output_files][0]       ${confidential_pdf_one}[CONFIDENTIALITY_STATEMENT]
 
 Confidentiality Statement Is Dynamic
+    [Tags]  confidentiality   dynamic_env
     Test transform  ${confidential_pdf_two}
     Should Contain Confidentiality Statement    ${confidential_pdf_two}[TRANSFORM_OUTPUT]/${confidential_pdf_two}[output_files][0]       ${confidential_pdf_two}[CONFIDENTIALITY_STATEMENT]
 
+Default NeuronSphere Cover Image Is Used
+    [Tags]  logos   dynamic_env
+    Test Transform  ${default_cover_image}
+    Should Contain Correct Cover Image  ${default_cover_image}[TRANSFORM_OUTPUT]/${default_cover_image}[output_files][1]    ${default_cover_image}[logo_file]
+
+Default NeuronSphere Cover Image Is Dynamic
+    [Tags]  logos   dynamic_env
+    Test Transform  ${default_pdf_cover_image}
+    Should Contain Correct Cover Image  ${default_pdf_cover_image}[TRANSFORM_OUTPUT]/${default_pdf_cover_image}[output_files][1]    ${default_pdf_cover_image}[logo_file]
+    
+Default NeuronSphere HTML Logo Is Used
+    [Tags]  logos   dynamic_env
+    Test Transform  ${html_logo_default}
+    Should Contain Correct Cover Image  ${html_logo_default}[TRANSFORM_OUTPUT]/${html_logo_default}[output_files][0]    ${html_logo_default}[logo_file]
+        
+Default NeuronSphere HTML Logo Is Dynamic
+    [Tags]  logos   dynamic_env
+    Test Transform  ${html_logo_dynamic}
+    Should Contain Correct Cover Image  ${html_logo_dynamic}[TRANSFORM_OUTPUT]/${html_logo_dynamic}[output_files][0]    ${html_logo_dynamic}[logo_file]
+    
 
 *** Keywords ***
 Test transform
@@ -49,6 +71,7 @@ Load Environment Variables
     Set Environment Variable    TRANSFORM_INPUT    ${env}[TRANSFORM_INPUT]
     Set Environment Variable    TRANSFORM_OUTPUT    ${env}[TRANSFORM_OUTPUT]
     Set Environment Variable    CONFIDENTIALITY_STATEMENT   ${env}[CONFIDENTIALITY_STATEMENT]
+    Set Environment Variable    DEFAULT_LOGO   ${env}[DEFAULT_LOGO]
 
 Do transform
     [Documentation]    Run transform container with expected volume mounts and env variables
@@ -66,4 +89,4 @@ Check output files
     END
 
 Reset Environment Variables
-    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT   VERSION     CONFIDENTIALITY_STATEMENT
+    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT   VERSION     CONFIDENTIALITY_STATEMENT   DEFAULT_LOGO

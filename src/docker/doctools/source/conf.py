@@ -16,7 +16,7 @@ import datetime
 from importlib import import_module
 import inspect
 import ast
-from operator import countOf
+import requests
 
 sys.path.insert(0, os.path.abspath("../packages"))
 
@@ -201,8 +201,36 @@ html_theme = "alabaster"
 html_static_path = ["_static"]
 # html_logo = f"./{html_static_path[0]}/Neuron_Sphere_Symbol_Color2.png"
 
-# TODO: add option to configure html logo from URL
-default_html_logo = "Neuron_Sphere_Logo_RGB_Color.png"
+default_logo = os.environ.get(
+    "DEFAULT_LOGO", f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+)
+
+# In case empty string is passed
+if not default_logo:
+    default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+
+default_html_logo = os.environ.get("HTML_DEFAULT_LOGO", default_logo)
+
+default_html_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
+
+if default_html_logo.startswith("http"):
+    filename = default_html_logo.split("?")[0].split("/")[-1]
+    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
+        resp = requests.get(default_html_logo, stream=True)
+
+        if not resp.ok:
+            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {default_html_logo}")
+
+        for chunk in resp.iter_content(1024):
+            if not chunk:
+                break
+
+            handler.write(chunk)
+
+    default_html_logo = filename
+else:
+    default_html_logo = default_html_logo.removeprefix(f"./{html_static_path[0]}")
+
 html_theme_options = {
     "logo": default_html_logo,
     "logo_name": True,
@@ -246,9 +274,23 @@ if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
     )
 
 
-default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
-# TODO: add option to configure pdf logo (from URL, github maybe)
-latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+latex_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
+
+if latex_logo.startswith("http"):
+    filename = latex_logo.split("?")[0].split("/")[-1]
+    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
+        resp = requests.get(latex_logo, stream=True)
+
+        if not resp.ok:
+            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {latex_logo}")
+
+        for chunk in resp.iter_content(1024):
+            if not chunk:
+                break
+
+            handler.write(chunk)
+
+    latex_logo = f"./{html_static_path[0]}/{filename}"
 
 # set document naming
 # TODO: add other options to set title manually or remove timestamp
