@@ -3,16 +3,26 @@ Documentation    Test template for running transform container with multiple inp
 Force Tags    Transform run
 Library    Process
 Library    OperatingSystem
+Library     resources.PdfChecks.PdfChecks
 
 Variables    tx_vars.py
 
 
 *** Test Cases ***
-Test transform engine
+Test Bartleby Transform
     [Documentation]     Run transform template suite
     [Template]    Test transform
     ${set_one}
     ${set_two}
+
+Confidentiality Statement Exists In PDF
+    Test transform  ${confidential_pdf_one}
+    Should Contain Confidentiality Statement    ${confidential_pdf_one}[TRANSFORM_OUTPUT]/${confidential_pdf_one}[output_files][0]       ${confidential_pdf_one}[CONFIDENTIALITY_STATEMENT]
+
+Confidentiality Statement Is Dynamic
+    Test transform  ${confidential_pdf_two}
+    Should Contain Confidentiality Statement    ${confidential_pdf_two}[TRANSFORM_OUTPUT]/${confidential_pdf_two}[output_files][0]       ${confidential_pdf_two}[CONFIDENTIALITY_STATEMENT]
+
 
 *** Keywords ***
 Test transform
