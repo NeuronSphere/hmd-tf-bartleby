@@ -171,6 +171,10 @@ def entry_point():
                     dst=output_content_path,
                     dirs_exist_ok=True,
                 )
+                if transform_instance_context["shell"] == "pdf":
+                    pdfs = output_content_path.rglob("latex/*.pdf")
+                    for pdf in pdfs:
+                        shutil.copy2(pdf, output_content_path / pdf.name)
             else:
                 logger.info("No generated docs to copy..")
 
