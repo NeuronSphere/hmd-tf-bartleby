@@ -266,7 +266,8 @@ latex_elements = {
     "sphinxsetup": r"VerbatimColor={RGB}{235,236,240}, verbatimwithframe=false, noteBorderColor={RGB}{167,11,82}, InnerLinkColor={RGB}{24,0,117}, TitleColor={RGB}{24,0,117}, vmargin={0.75in,0.75in}",
 }
 
-if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
+print(os.environ.get("CONFIDENTIALITY_STATEMENT", None))
+if os.environ.get("CONFIDENTIALITY_STATEMENT", None) is not None:
     latex_elements["atendofbody"] = (
         r"\vspace*{\fill}\textit{"
         + os.environ.get("CONFIDENTIALITY_STATEMENT")
@@ -296,5 +297,5 @@ if latex_logo.startswith("http"):
 # TODO: add other options to set title manually or remove timestamp
 doc_name = os.environ.get("DOCUMENT_TITLE", f"{repo_name}-{repo_version}")
 if not os.environ.get("NO_TIMESTAMP_TITLE"):
-    doc_name = doc_name + str(datetime.datetime.now())
+    doc_name = doc_name + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 latex_documents = [("index", f"{doc_name}.tex", project, author, "manual")]
