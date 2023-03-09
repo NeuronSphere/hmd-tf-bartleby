@@ -30,7 +30,7 @@ set_two = {
     "TRANSFORM_OUTPUT": "output_files2",
     "CONFIDENTIALITY_STATEMENT": "",
     "DEFAULT_LOGO": "",
-    "output_files": ["latex/bartleby-test-0.1-linux-amd64.pdf"],
+    "output_files": [f"latex/bartleby-test-{version}.pdf"],
 }
 
 confidential_pdf_one = {
@@ -40,7 +40,7 @@ confidential_pdf_one = {
     "TRANSFORM_OUTPUT": "output_files_pdf_1",
     "CONFIDENTIALITY_STATEMENT": """HMD Labs Test""",
     "DEFAULT_LOGO": "",
-    "output_files": ["latex/bartleby-test-0.1-linux-amd64.pdf"],
+    "output_files": [f"latex/bartleby-test-{version}.pdf"],
 }
 
 
@@ -51,7 +51,7 @@ confidential_pdf_two = {
     "TRANSFORM_OUTPUT": "output_files_pdf_2",
     "DEFAULT_LOGO": "",
     "CONFIDENTIALITY_STATEMENT": """Test statement""",
-    "output_files": ["latex/bartleby-test-0.1-linux-amd64.pdf"],
+    "output_files": [f"latex/bartleby-test-{version}.pdf"],
 }
 
 default_cover_image = {
@@ -64,8 +64,8 @@ default_cover_image = {
 document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third
 party without the prior written consent of HMD Labs.""",
     "output_files": [
-        "latex/bartleby-test-0.1-linux-amd64.pdf",
-        "latex/bartleby-test-0.1-linux-amd64.tex",
+        f"latex/bartleby-test-{version}.pdf",
+        f"latex/bartleby-test-{version}.tex",
     ],
     "logo_file": "NeuronSphereSwoosh.jpg",
 }
@@ -81,8 +81,8 @@ document nor the information herein may be reproduced, used, or disclosed to or 
 party without the prior written consent of HMD Labs.""",
     "DEFAULT_LOGO": "https://www.neuronsphere.io/hs-fs/hubfs/NeuronSphere_Trios.png?width=500&height=379&name=NeuronSphere_Trios.png",
     "output_files": [
-        "latex/bartleby-test-0.1-linux-amd64.pdf",
-        "latex/bartleby-test-0.1-linux-amd64.tex",
+        f"latex/bartleby-test-{version}.pdf",
+        f"latex/bartleby-test-{version}.tex",
     ],
     "logo_file": "NeuronSphere_Trios.png",
 }
