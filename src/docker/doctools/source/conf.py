@@ -261,6 +261,7 @@ latex_theme = "howto"
 
 # other elements used in latex pdf generation
 latex_elements = {
+    "extraclassoptions": "openany,oneside",
     "figure_align": "H",
     "preamble": r"\usepackage{enumitem}\setlistdepth{99}\usepackage{charter}\usepackage[defaultsans]{lato}\usepackage{inconsolata}\setlength{\fboxsep}{6pt}",
     "makeindex": r"\usepackage[columns=1]{idxlayout}\makeindex",
