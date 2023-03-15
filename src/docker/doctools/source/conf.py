@@ -46,6 +46,7 @@ extensions = [
     "sphinx.ext.autosummary",
     "nbsphinx",
     "myst_parser",
+    "sphinx_needs",
 ]
 
 source_suffix = {
