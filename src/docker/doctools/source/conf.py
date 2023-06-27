@@ -16,7 +16,7 @@ import datetime
 from importlib import import_module
 import inspect
 import ast
-from operator import countOf
+import requests
 
 sys.path.insert(0, os.path.abspath("../packages"))
 
@@ -44,7 +44,9 @@ extensions = [
     "sphinxcontrib.plantuml",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
-    "nbsphinx" "myst_parser",
+    "nbsphinx",
+    "myst_parser",
+    "sphinx_needs",
 ]
 
 source_suffix = {
@@ -200,8 +202,36 @@ html_theme = "alabaster"
 html_static_path = ["_static"]
 # html_logo = f"./{html_static_path[0]}/Neuron_Sphere_Symbol_Color2.png"
 
-# TODO: add option to configure html logo from URL
-default_html_logo = "Neuron_Sphere_Logo_RGB_Color.png"
+default_logo = os.environ.get(
+    "DEFAULT_LOGO", f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+)
+
+# In case empty string is passed
+if not default_logo:
+    default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+
+default_html_logo = os.environ.get("HTML_DEFAULT_LOGO", default_logo)
+
+default_html_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
+
+if default_html_logo.startswith("http"):
+    filename = default_html_logo.split("?")[0].split("/")[-1]
+    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
+        resp = requests.get(default_html_logo, stream=True)
+
+        if not resp.ok:
+            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {default_html_logo}")
+
+        for chunk in resp.iter_content(1024):
+            if not chunk:
+                break
+
+            handler.write(chunk)
+
+    default_html_logo = filename
+else:
+    default_html_logo = default_html_logo.removeprefix(f"./{html_static_path[0]}")
+
 html_theme_options = {
     "logo": default_html_logo,
     "logo_name": True,
@@ -231,15 +261,15 @@ latex_theme = "howto"
 
 # other elements used in latex pdf generation
 latex_elements = {
+    "extraclassoptions": "openany,oneside",
     "figure_align": "H",
     "preamble": r"\usepackage{enumitem}\setlistdepth{99}\usepackage{charter}\usepackage[defaultsans]{lato}\usepackage{inconsolata}\setlength{\fboxsep}{6pt}",
     "makeindex": r"\usepackage[columns=1]{idxlayout}\makeindex",
     "sphinxsetup": r"VerbatimColor={RGB}{235,236,240}, verbatimwithframe=false, noteBorderColor={RGB}{167,11,82}, InnerLinkColor={RGB}{24,0,117}, TitleColor={RGB}{24,0,117}, vmargin={0.75in,0.75in}",
 }
 
-# TODO: make the content of this env the actual statement (need to find a place to insert into html as well)
-if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
-    # TODO: replace HMD statement with value from env
+print(os.environ.get("CONFIDENTIALITY_STATEMENT", None))
+if os.environ.get("CONFIDENTIALITY_STATEMENT", None) is not None:
     latex_elements["atendofbody"] = (
         r"\vspace*{\fill}\textit{"
         + os.environ.get("CONFIDENTIALITY_STATEMENT")
@@ -247,13 +277,27 @@ if os.environ.get("CONFIDENTIALITY_STATEMENT", None):
     )
 
 
-default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
-# TODO: add option to configure pdf logo (from URL, github maybe)
-latex_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
+latex_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
+
+if latex_logo.startswith("http"):
+    filename = latex_logo.split("?")[0].split("/")[-1]
+    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
+        resp = requests.get(latex_logo, stream=True)
+
+        if not resp.ok:
+            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {latex_logo}")
+
+        for chunk in resp.iter_content(1024):
+            if not chunk:
+                break
+
+            handler.write(chunk)
+
+    latex_logo = f"./{html_static_path[0]}/{filename}"
 
 # set document naming
 # TODO: add other options to set title manually or remove timestamp
 doc_name = os.environ.get("DOCUMENT_TITLE", f"{repo_name}-{repo_version}")
 if not os.environ.get("NO_TIMESTAMP_TITLE"):
-    doc_name = doc_name + str(datetime.datetime.now())
+    doc_name = doc_name + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 latex_documents = [("index", f"{doc_name}.tex", project, author, "manual")]

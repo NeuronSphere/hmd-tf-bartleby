@@ -8,3 +8,4 @@ hmd-graphql
 nbsphinx
 sphinx-needs
 myst-parser
+requests

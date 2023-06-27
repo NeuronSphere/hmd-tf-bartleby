@@ -1,5 +1,1 @@
-hmd-cli-app
-hmd-cli-tools
-hmd-cli-artifact
-hmd-cli-docker
-robotframework
+PyMuPDF
