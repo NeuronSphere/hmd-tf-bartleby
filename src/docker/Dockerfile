@@ -17,6 +17,7 @@ RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
 
 ENV TRANSFORM_INSTANCE_CONTEXT {\"shell\": \"default\"}
 ENV NID_CONTEXT default
+ENV PLANTUML_LIMIT_SIZE 8192
 
 WORKDIR /app
 COPY src/docker/entrypoint.py .
