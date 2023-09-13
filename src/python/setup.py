@@ -14,7 +14,7 @@ setup(
     description="Runs the document generation transform",
     author="Kate Walls",
     author_email="kate.walls@hmdlabs.io",
-    license="unlicensed",
+    license="Apache 2.0",
     packages=find_packages(),
     include_package_data=True,
     install_requires=[],

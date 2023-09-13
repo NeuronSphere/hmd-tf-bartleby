@@ -147,3 +147,4 @@ src/docker/python/
 src/docker/requirements_local.*
 src/docker/meta-data/
 test/output*
+target/bartleby/

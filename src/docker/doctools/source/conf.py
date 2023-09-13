@@ -21,17 +21,19 @@ import requests
 sys.path.insert(0, os.path.abspath("../packages"))
 
 # -- Project information -----------------------------------------------------
-company_name_acronym = "HMD"
+company_name_acronym = os.environ.get("HMD_DOC_COMPANY_NAME", "HMD Labs")
 repo_name = os.environ.get("HMD_DOC_REPO_NAME")
 repo_version = os.environ.get("HMD_DOC_REPO_VERSION")
 if len(repo_name.split(",")) == 1:
-    project = "NeuronSphere component: \n{}".format(repo_name)
+    project = "{}".format(repo_name)
     release = repo_version
 else:
-    project = f"NeuronSphere components: {repo_name}"
+    project = f"{repo_name}"
     release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
-copyright = "{}, {} Labs".format(datetime.date.today().year, company_name_acronym)
-author = "{} Labs".format(company_name_acronym)
+
+project = os.environ.get("DOCUMENT_TITLE", project)
+copyright = "{}, {}".format(datetime.date.today().year, company_name_acronym)
+author = "{}".format(company_name_acronym)
 
 # -- General configuration ---------------------------------------------------
 
@@ -47,6 +49,7 @@ extensions = [
     "nbsphinx",
     "myst_parser",
     "sphinx_needs",
+    "sphinx_revealjs",
 ]
 
 source_suffix = {
@@ -296,8 +299,14 @@ if latex_logo.startswith("http"):
     latex_logo = f"./{html_static_path[0]}/{filename}"
 
 # set document naming
-# TODO: add other options to set title manually or remove timestamp
 doc_name = os.environ.get("DOCUMENT_TITLE", f"{repo_name}-{repo_version}")
 if not os.environ.get("NO_TIMESTAMP_TITLE"):
     doc_name = doc_name + datetime.datetime.now().strftime("%Y-%m-%d_%H_%M_%S")
 latex_documents = [("index", f"{doc_name}.tex", project, author, "manual")]
+
+# -- Options for RevealJS output -------------------------------------------------
+
+revealjs_js_files = []
+revealjs_css_files = []
+revealjs_static_path = ["_static"]
+revealjs_script_conf = '{"controls": true}'
