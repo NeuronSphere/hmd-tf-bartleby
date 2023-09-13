@@ -21,6 +21,12 @@ logger.setLevel(logging.INFO)
 
 
 def render_puml(files: List[str]):
+    '''
+
+    :param files:
+    :return:
+    '''
+    #TODO allow options for puml outputs
     input_content_path = Path("/hmd_transform/input")
     output_content_path = Path("/hmd_transform/output")
     with cd(input_content_path):
@@ -33,6 +39,7 @@ def render_puml(files: List[str]):
                 output_content_path,
                 file,
             ]
+            #TODO do something useful with stderr and out
             process = run(command)
             if process.returncode != 0:
                 raise Exception(f"Puml generation failed for {file}")
@@ -160,7 +167,7 @@ def entry_point():
             if transform_instance_context["shell"] != "default":
                 cmd_ar.extend(transform_instance_context["shell"].split(" "))
 
-            logger.info(f"Executing: {cmd_ar}")
+            logger.info(f"Executing:  {cmd_ar}")
             with open(log_file, "w") as log:
                 sphinx = run(cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log)
 

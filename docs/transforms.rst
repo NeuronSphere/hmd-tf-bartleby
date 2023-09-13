@@ -125,7 +125,7 @@ Project Structure:
 
 
 A CLI
-==============================
+---------
 Some of this content should be moved to a more standard location for 'cli-ing a transform'.
 
 The idea of a CLI for bartleby or any other transform is similar - the executable communicates with the docker
