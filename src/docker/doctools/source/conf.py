@@ -49,7 +49,7 @@ extensions = [
     "nbsphinx",
     "myst_parser",
     "sphinx_needs",
-    "sphinx_revealjs",
+    # "sphinx_revealjs",
 ]
 
 source_suffix = {
@@ -306,7 +306,7 @@ latex_documents = [("index", f"{doc_name}.tex", project, author, "manual")]
 
 # -- Options for RevealJS output -------------------------------------------------
 
-revealjs_js_files = []
-revealjs_css_files = []
-revealjs_static_path = ["_static"]
-revealjs_script_conf = '{"controls": true}'
+# revealjs_js_files = []
+# revealjs_css_files = []
+# revealjs_static_path = ["_static"]
+# revealjs_script_conf = '{"controls": true}'
