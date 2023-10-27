@@ -12,6 +12,7 @@
 #
 import os
 import sys
+from urllib.parse import unquote
 import datetime
 from importlib import import_module
 import inspect
@@ -42,6 +43,7 @@ author = "{}".format(company_name_acronym)
 # ones.
 # TODO: add option to extend this list, along with requirements.txt
 extensions = [
+    "sphinx_revealjs",
     "sphinx_copybutton",
     "sphinxcontrib.plantuml",
     "sphinx.ext.autodoc",
@@ -49,7 +51,6 @@ extensions = [
     "nbsphinx",
     "myst_parser",
     "sphinx_needs",
-    # "sphinx_revealjs",
 ]
 
 source_suffix = {
@@ -72,6 +73,10 @@ autodoc_default_options = {
 autodoc_docstring_signature = True
 
 autosummary_generate = True
+
+nbsphinx_requirejs_path = (
+    "https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"
+)
 
 
 # docstring processing
@@ -197,7 +202,7 @@ plantuml = "java -jar /usr/local/bin/plantuml.jar"
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "alabaster"
+# html_theme = "alabaster"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -283,7 +288,7 @@ if os.environ.get("CONFIDENTIALITY_STATEMENT", None) is not None:
 latex_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
 
 if latex_logo.startswith("http"):
-    filename = latex_logo.split("?")[0].split("/")[-1]
+    filename = unquote(latex_logo).split("?")[0].split("/")[-1]
     with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
         resp = requests.get(latex_logo, stream=True)
 
@@ -306,7 +311,7 @@ latex_documents = [("index", f"{doc_name}.tex", project, author, "manual")]
 
 # -- Options for RevealJS output -------------------------------------------------
 
-# revealjs_js_files = []
-# revealjs_css_files = []
-# revealjs_static_path = ["_static"]
-# revealjs_script_conf = '{"controls": true}'
+revealjs_js_files = []
+revealjs_css_files = []
+revealjs_static_path = ["_static"]
+revealjs_script_conf = '{"controls": true}'
