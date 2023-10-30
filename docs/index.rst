@@ -5,5 +5,8 @@ hmd-tf-bartleby
 
 .. toctree::
    :maxdepth: 2
+   :caption: Contents:
+   :glob:
 
    transforms
+   proposals/index
