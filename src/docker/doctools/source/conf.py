@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import json
 from urllib.parse import unquote
 import datetime
 from importlib import import_module
@@ -20,6 +21,11 @@ import ast
 import requests
 
 sys.path.insert(0, os.path.abspath("../packages"))
+
+# -- Transform Context -------------------------------------------------------
+
+transform_instance_context = json.loads(os.environ.get("TRANSFORM_INSTANCE_CONTEXT"))
+print(transform_instance_context)
 
 # -- Project information -----------------------------------------------------
 company_name_acronym = os.environ.get("HMD_DOC_COMPANY_NAME", "HMD Labs")
@@ -37,6 +43,8 @@ copyright = "{}, {}".format(datetime.date.today().year, company_name_acronym)
 author = "{}".format(company_name_acronym)
 
 # -- General configuration ---------------------------------------------------
+
+root_doc = transform_instance_context.get("root_doc", "index")
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom

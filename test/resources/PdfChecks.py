@@ -23,6 +23,18 @@ class PdfChecks:
             raise Failure("Could not find correct confidentiality statement")
 
     @keyword
+    def should_contain_correct_title(self, filepath: str, title: str):
+        doc = fitz.open(filepath)
+        exists = False
+        for page in doc:
+            exists = re.search(title, page.get_text())
+            if exists:
+                break
+
+        if not exists:
+            raise Failure("Could not find correct title")
+
+    @keyword
     def should_contain_correct_cover_image(self, filepath: str, logo_path: str):
         latex = open(filepath, "r").read()
 

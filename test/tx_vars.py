@@ -114,3 +114,16 @@ party without the prior written consent of HMD Labs.""",
     "output_files": ["html/index.html", "html/readme.html"],
     "logo_file": "NeuronSphere_Trios.png",
 }
+
+root_doc_change = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "pdf", "root_doc": "readme"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_root_1",
+    "DEFAULT_LOGO": "https://www.neuronsphere.io/hs-fs/hubfs/NeuronSphere_Trios.png?width=500&height=379&name=NeuronSphere_Trios.png",
+    "CONFIDENTIALITY_STATEMENT": """HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this
+document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third
+party without the prior written consent of HMD Labs.""",
+    "output_files": [f"bartleby-test-{version}.pdf"],
+    "logo_file": "NeuronSphere_Trios.png",
+}
