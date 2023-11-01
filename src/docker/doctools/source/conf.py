@@ -54,6 +54,7 @@ extensions = [
     "sphinx_revealjs",
     "sphinx_copybutton",
     "sphinxcontrib.plantuml",
+    "sphinxcontrib.confluencebuilder",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "nbsphinx",
@@ -323,3 +324,8 @@ revealjs_js_files = []
 revealjs_css_files = []
 revealjs_static_path = ["_static"]
 revealjs_script_conf = '{"controls": true}'
+
+extra_config = transform_instance_context.get("config", {})
+
+for key, value in extra_config.items():
+    globals()[key] = value

@@ -9,4 +9,5 @@ sphinx-needs
 myst-parser
 requests
 sphinx-revealjs
+sphinxcontrib-confluencebuilder
 hmd-cli-tools~=1.1

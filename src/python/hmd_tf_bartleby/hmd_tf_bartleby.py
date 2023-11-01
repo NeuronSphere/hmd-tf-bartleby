@@ -21,12 +21,12 @@ logger.setLevel(logging.INFO)
 
 
 def render_puml(files: List[str]):
-    '''
+    """
 
     :param files:
     :return:
-    '''
-    #TODO allow options for puml outputs
+    """
+    # TODO allow options for puml outputs
     input_content_path = Path("/hmd_transform/input")
     output_content_path = Path("/hmd_transform/output")
     with cd(input_content_path):
@@ -39,7 +39,7 @@ def render_puml(files: List[str]):
                 output_content_path,
                 file,
             ]
-            #TODO do something useful with stderr and out
+            # TODO do something useful with stderr and out
             process = run(command)
             if process.returncode != 0:
                 raise Exception(f"Puml generation failed for {file}")
@@ -47,7 +47,6 @@ def render_puml(files: List[str]):
 
 
 def entry_point():
-
     # initialize variables for transform I/O
     input_content_path = Path("/hmd_transform/input")
     output_content_path = Path("/hmd_transform/output")
@@ -77,7 +76,6 @@ def entry_point():
                 raise Exception("Autodoc requires pip credentials as secrets.")
 
     def get_index(path: Path, name, trunc=False):
-
         with path.open("r") as index:
             text = index.readlines()
             name = name.replace("-", "_")
@@ -97,7 +95,6 @@ def entry_point():
         return text
 
     def add_package_to_index(path: Path, name, trunc=False):
-
         index = [
             file
             for file in os.scandir(path)
@@ -111,7 +108,6 @@ def entry_point():
                 index.writelines(text)
 
     def do_transform():
-
         docs_exists = os.path.exists(input_content_path / "docs")
 
         with tempfile.TemporaryDirectory() as tmpdir:
