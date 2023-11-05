@@ -11,3 +11,4 @@ requests
 sphinx-revealjs
 sphinxcontrib-confluencebuilder
 hmd-cli-tools~=1.1
+sphinxcontrib.datatemplates

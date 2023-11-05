@@ -10,3 +10,4 @@ hmd-tf-bartleby
 
    transforms
    proposals/index
+   data_template_test

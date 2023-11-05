@@ -55,6 +55,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinxcontrib.plantuml",
     "sphinxcontrib.confluencebuilder",
+    "sphinxcontrib.datatemplates",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "nbsphinx",
