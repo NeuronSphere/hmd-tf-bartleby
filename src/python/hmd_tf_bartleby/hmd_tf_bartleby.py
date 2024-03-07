@@ -116,18 +116,27 @@ def entry_point():
                 src=input_content_path.parent / "doctools",
                 dst=tmpdir,
                 dirs_exist_ok=True,
+                ignore_dangling_symlinks=True,
             )
             logger.info("Copying raw docs..")
             shutil.copytree(
-                src=input_content_path
-                if not docs_exists
-                else input_content_path / "docs",
+                src=(
+                    input_content_path
+                    if not docs_exists
+                    else input_content_path / "docs"
+                ),
                 dst=os.path.join(tmpdir, "source"),
                 dirs_exist_ok=True,
+                ignore_dangling_symlinks=True,
             )
 
             if docs_exists:
-                shutil.copytree(src=input_content_path, dst=tmpdir, dirs_exist_ok=True)
+                shutil.copytree(
+                    src=input_content_path,
+                    dst=tmpdir,
+                    ignore_dangling_symlinks=True,
+                    dirs_exist_ok=True,
+                )
 
             if os.path.exists(os.path.join(tmpdir, "Makefile")):
                 os.remove(os.path.join(tmpdir, "Makefile"))
