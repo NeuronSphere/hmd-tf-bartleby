@@ -1,4 +1,5 @@
 import shutil
+import stat
 import tempfile
 import logging
 import sys
@@ -144,6 +145,8 @@ def entry_point():
                 os.path.join(tmpdir, "HMD_Bartleby_Makefile"),
                 os.path.join(tmpdir, "Makefile"),
             )
+            st = os.stat(os.path.join(tmpdir, "Makefile"))
+            os.chmod(os.path.join(tmpdir, "Makefile"), 777)
 
             autodoc = os.environ.get("AUTODOC")
             if autodoc == "True":
