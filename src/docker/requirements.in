@@ -4,6 +4,7 @@ sphinx-jsonschema==1.17.2
 sphinx-inline-tabs==2022.1.2b11
 when-changed==0.3.0
 sphinxcontrib-plantuml==0.23
+sphinx==7.1.2
 nbsphinx
 sphinx-needs
 myst-parser
