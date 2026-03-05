@@ -1,4 +1,4 @@
-hmd-tf-bartleby~=1.0
+hmd-tf-bartleby==<current>
 sphinx==8.2.3
 sphinx-copybutton==0.5.2
 sphinx-jsonschema==1.19.2
@@ -12,4 +12,4 @@ sphinx-needs==6.3.0
 myst-parser==5.0.0
 when-changed==0.3.0
 requests
-hmd-cli-tools~=1.1
+hmd-cli-tools~=1.2
