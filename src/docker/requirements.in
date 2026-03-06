@@ -12,4 +12,4 @@ sphinx-needs==6.3.0
 myst-parser==5.0.0
 when-changed==0.3.0
 requests
-hmd-cli-tools~=1.2
+hmd-cli-tools~=1.2.244
