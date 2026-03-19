@@ -1,0 +1,6 @@
+.git
+test/
+docs/
+*.md
+.pre-commit-config.yaml
+.gitignore

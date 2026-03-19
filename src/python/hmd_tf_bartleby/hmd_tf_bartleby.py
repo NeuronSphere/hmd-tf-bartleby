@@ -5,10 +5,21 @@ import logging
 import sys
 import os
 import json
+from contextlib import contextmanager
 from pathlib import Path
 from subprocess import run, STDOUT
 from typing import List
-from hmd_cli_tools.hmd_cli_tools import cd
+
+
+@contextmanager
+def cd(newdir):
+    prevdir = os.getcwd()
+    os.chdir(os.path.expanduser(newdir))
+    try:
+        yield
+    finally:
+        os.chdir(prevdir)
+
 
 logging.basicConfig(
     stream=sys.stdout,
