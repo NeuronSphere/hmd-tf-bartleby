@@ -190,7 +190,8 @@ def skip_members(app, what, name, obj, skip, options):
 
 
 def setup(app):
-    app.add_css_file("styles.css")
+    if not _disable_default_styles:
+        app.add_css_file("styles.css")
     app.connect("autodoc-process-docstring", extra_processing)
     app.connect("autodoc-process-signature", signature_processing)
     app.connect("autodoc-skip-member", skip_members)
@@ -326,7 +327,16 @@ revealjs_css_files = []
 revealjs_static_path = ["_static"]
 revealjs_script_conf = '{"controls": true}'
 
-extra_config = transform_instance_context.get("config", {})
+# Apply global style overrides (from $HMD_HOME/bartleby/styles/<shell>/conf_overrides.json)
+_global_conf_overrides_raw = os.environ.get("BARTLEBY_GLOBAL_CONF_OVERRIDES", "{}")
+_global_conf_overrides = json.loads(_global_conf_overrides_raw)
+for key, value in _global_conf_overrides.items():
+    globals()[key] = value
 
+# Apply per-repo config overrides (from manifest.json) — these win over global
+extra_config = transform_instance_context.get("config", {})
 for key, value in extra_config.items():
     globals()[key] = value
+
+# Support disable_default_styles flag from either level
+_disable_default_styles = globals().get("disable_default_styles", False)

@@ -10,7 +10,6 @@ from subprocess import run, STDOUT
 from typing import List
 from hmd_cli_tools.hmd_cli_tools import cd
 
-
 logging.basicConfig(
     stream=sys.stdout,
     format="%(levelname)s %(asctime)s - %(message)s",
@@ -119,6 +118,25 @@ def entry_point():
                 dirs_exist_ok=True,
                 ignore_dangling_symlinks=True,
             )
+            # Copy global styles (from $HMD_HOME/bartleby/styles/<shell>/)
+            shell = transform_instance_context.get("shell", "")
+            global_styles_path = Path("/hmd_transform/global_styles") / shell
+            if global_styles_path.exists():
+                for subdir in ["_static", "_templates"]:
+                    src = global_styles_path / subdir
+                    if src.exists():
+                        shutil.copytree(
+                            src=src,
+                            dst=os.path.join(tmpdir, "source", subdir),
+                            dirs_exist_ok=True,
+                            ignore_dangling_symlinks=True,
+                        )
+                conf_overrides = global_styles_path / "conf_overrides.json"
+                if conf_overrides.exists():
+                    os.environ["BARTLEBY_GLOBAL_CONF_OVERRIDES"] = (
+                        conf_overrides.read_text()
+                    )
+
             logger.info("Copying raw docs..")
             shutil.copytree(
                 src=(
