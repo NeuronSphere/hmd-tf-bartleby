@@ -1,5 +1,3 @@
-# syntax = docker/dockerfile:1.0-experimental
-
 FROM sphinxdoc/sphinx-latexpdf:8.2.3
 
 COPY src/docker/doctools /hmd_transform/doctools
