@@ -1,14 +1,22 @@
-FROM sphinxdoc/sphinx-latexpdf:8.2.3
-
-COPY src/docker/doctools /hmd_transform/doctools
+# Stage 1: Download build artifacts in a lightweight throwaway image
+FROM python:3.13-slim AS deps
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl default-jre-headless && \
-    curl -L "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" -o /usr/local/bin/plantuml.jar && \
-    apt-get purge -y curl && \
-    apt-get autoremove -y && \
+    apt-get install -y --no-install-recommends curl && \
+    curl -L "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" \
+      -o /plantuml.jar && \
     rm -rf /var/lib/apt/lists/*
 
+# Stage 2: Runtime image with full texlive for broad PDF support
+FROM sphinxdoc/sphinx-latexpdf:8.2.3
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY --from=deps /plantuml.jar /usr/local/bin/plantuml.jar
+
+COPY src/docker/doctools /hmd_transform/doctools
 COPY meta-data /meta-data
 COPY src/python /src/python
 COPY src/docker/requirements.txt .
