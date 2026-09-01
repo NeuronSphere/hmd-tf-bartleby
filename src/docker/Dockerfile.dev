@@ -1,0 +1,44 @@
+# Development image, built from the working tree by `make image-local`.
+#
+# It differs from Dockerfile.local in two ways, both about the local build loop:
+#
+#   - plantuml.jar is taken from the build context instead of being downloaded.
+#     The Makefile stages it from an image you already have, so rebuilding after
+#     an edit to the entrypoint needs no network and cannot fail on a slow
+#     SourceForge mirror.
+#   - The transform's Python package is installed from source, like
+#     Dockerfile.local, so the code being edited is the code that runs.
+#
+# Dockerfile.local is left alone because the HMD docker build stages its context;
+# this file is only used by the Makefile.
+
+FROM sphinxdoc/sphinx-latexpdf:8.2.3
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends default-jre-headless && \
+    rm -rf /var/lib/apt/lists/*
+
+COPY plantuml.jar /usr/local/bin/plantuml.jar
+
+COPY doctools /hmd_transform/doctools
+COPY requirements.txt .
+
+# No pip secret: the private index pin is dropped for local builds, so every
+# requirement here is public. That also keeps this Dockerfile buildable with the
+# classic builder, without BuildKit or the buildx plugin.
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY ./meta-data /meta-data/
+COPY ./python /src/python
+
+RUN pip install --no-cache-dir -e /src/python/
+
+ENV TRANSFORM_INSTANCE_CONTEXT="{\"shell\": \"default\"}"
+ENV NID_CONTEXT=default
+ENV PLANTUML_LIMIT_SIZE=8192
+
+WORKDIR /app
+COPY entrypoint.py .
+COPY entry_puml.py .
+
+CMD [ "python", "entrypoint.py" ]

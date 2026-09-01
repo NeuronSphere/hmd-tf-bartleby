@@ -148,3 +148,7 @@ src/docker/requirements_local.*
 src/docker/meta-data/
 test/output*
 target/bartleby/
+
+# Staged docker build contexts and the cached plantuml.jar (make image-local)
+target/
+STDOUT

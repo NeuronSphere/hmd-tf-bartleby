@@ -1,5 +1,29 @@
 # Changelog
 
+## 2026-08-31
+
+- fix: fail the transform when Sphinx fails. The exit code was captured and only
+  logged, so a document that did not compile produced a container that exited 0
+  and every caller reported a broken build as a success. The failure is raised
+  after the logs and any partial output are copied out, and names the log files.
+- feat: write Sphinx warnings and errors to `logs/<builder>-warnings.log` via
+  `SPHINXOPTS -w`, preserving any `SPHINXOPTS` the caller set. The combined log is
+  mostly progress and `latexmk` output; the lines that explain a broken document
+  were buried in it.
+- feat: copy LaTeX's own log to `logs/<builder>-latex-*.log` after a PDF build,
+  instead of leaving it in the `latex/` build tree beside megabytes of assets.
+- feat: `make image-local` builds the image from the working tree — no network, no
+  private index — for use with `bartleby --image hmd-tf-bartleby:local`. Adds
+  `src/docker/Dockerfile.dev`, which takes `plantuml.jar` from the build context
+  and installs the transform package from source. `Dockerfile.local` is unchanged
+  because the HMD docker build depends on its context shape.
+- fix: `curl -f` with retries and an archive check on the `plantuml.jar` download.
+  Without `-f`, a SourceForge error page was written to `plantuml.jar` and the
+  build carried on with a jar that was HTML.
+- docs: NERD003 records these as requirements; README documents the local loop and
+  the logs.
+
+
 ## 2026-02-26
 
 - feat: upgrade Sphinx 7.1.2 to 8.2.3 and all documentation dependencies to latest stable
