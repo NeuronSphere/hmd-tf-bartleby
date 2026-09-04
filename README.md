@@ -34,6 +34,25 @@ here:
 | `/hmd_transform/output` | out | Rendered documents, plus `logs/` |
 | `/hmd_transform/global_styles` | in, optional | `$HMD_HOME/bartleby/styles`, read-only |
 
+### Branding
+
+| Variable | Effect |
+|----------|--------|
+| `HMD_DOC_COPYRIGHT` | The whole footer notice. Defaults to `<year>, <company>` |
+| `HMD_DOC_COMPANY_NAME` | The company in that default, and the default author |
+| `HMD_DOC_AUTHOR` | The author, independently of the company |
+| `HTML_DEFAULT_LOGO` | The HTML sidebar logo |
+| `PDF_DEFAULT_LOGO` | The PDF cover image |
+| `DEFAULT_LOGO` | Fallback for both |
+
+A repository can set `copyright`, `author`, and `html_logo` in its manifest
+config instead, which is the better home for a permanent notice — per-repo config
+is applied to Sphinx settings after `conf.py` runs, so it wins.
+
+Setting `html_logo` replaces the logo rather than adding to it: the theme's own
+default steps aside, and the build log says which logo it kept. Note the footer
+renders `©` immediately before your string, so include any spacing you want.
+
 ### Logs
 
 Everything needed to diagnose a build lands in `/hmd_transform/output/logs/`,

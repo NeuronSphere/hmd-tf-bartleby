@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-09-04
+
+- feat: `HMD_DOC_COPYRIGHT` replaces the footer notice outright, and
+  `HMD_DOC_AUTHOR` the author. The line was assembled as `<year>, <company>`,
+  which allows "2026, GitLab Inc." and nothing else — no notice without a year,
+  no "All rights reserved", no third-party attribution. `copyright` and `author`
+  in a repository's manifest config also work, and are the better home for a
+  permanent notice.
+- fix: `HTML_DEFAULT_LOGO` did nothing. It and `PDF_DEFAULT_LOGO` were assigned
+  to the same variable, PDF second, so the HTML sidebar logo was whatever the PDF
+  variable said. They are separate settings now.
+- fix: two logos rendered when a repository set `html_logo`. Sphinx and the theme
+  have separate logo mechanisms and both were live: this transform always set
+  `html_theme_options["logo"]`, and a repository's `html_logo` added Sphinx's own
+  sidebar logo block on top of it, so the output stacked the repository's mark
+  above the NeuronSphere swoosh. Setting `html_logo` now replaces the logo, and
+  the build log records which one was kept.
+- docs: NERD004 records these as requirements; the README documents the branding
+  variables.
+
+
 ## 2026-08-31
 
 - fix: fail the transform when Sphinx fails. The exit code was captured and only
