@@ -194,19 +194,34 @@ def entry_point():
                         Path(os.path.join(tmpdir, "source")), repo_name
                     )
 
+            shell = transform_instance_context["shell"]
+
             log_path = output_content_path / "logs"
             os.makedirs(log_path, exist_ok=True)
-            log_file = log_path / f"{transform_instance_context['shell']}.log"
+            log_file = log_path / f"{shell}.log"
+            warning_file = log_path / f"{shell}-warnings.log"
 
-            logger.info(f"Executing: make {transform_instance_context['shell']}")
+            logger.info(f"Executing: make {shell}")
             # TODO: add option to extend this?
             cmd_ar = ["make"]
-            if transform_instance_context["shell"] != "default":
-                cmd_ar.extend(transform_instance_context["shell"].split(" "))
+            if shell != "default":
+                cmd_ar.extend(shell.split(" "))
+
+            # Sphinx writes its warnings and errors to a file of their own as
+            # well as to the combined log. The combined log is mostly latexmk
+            # and Sphinx progress output, so the handful of lines that explain a
+            # broken document are easy to miss in it. SPHINXOPTS is honoured by
+            # HMD_Bartleby_Makefile, and anything the caller already set there
+            # is preserved.
+            build_env = dict(os.environ)
+            sphinx_opts = build_env.get("SPHINXOPTS", "").strip()
+            build_env["SPHINXOPTS"] = f"{sphinx_opts} -w {warning_file}".strip()
 
             logger.info(f"Executing:  {cmd_ar}")
             with open(log_file, "w") as log:
-                sphinx = run(cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log)
+                sphinx = run(
+                    cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log, env=build_env
+                )
 
             if Path(os.path.join(tmpdir, "build")).exists():
                 logger.info("Copying generated docs..")
@@ -215,10 +230,17 @@ def entry_point():
                     dst=output_content_path,
                     dirs_exist_ok=True,
                 )
-                if transform_instance_context["shell"] == "pdf":
+                if shell == "pdf":
                     pdfs = output_content_path.rglob("latex/*.pdf")
                     for pdf in pdfs:
                         shutil.copy2(pdf, output_content_path / pdf.name)
+
+                # LaTeX explains PDF failures that Sphinx cannot: an undefined
+                # control sequence, a missing font, a box it could not set. That
+                # log is otherwise buried in the latex build tree next to
+                # megabytes of static assets.
+                for latex_log in output_content_path.rglob("latex/*.log"):
+                    shutil.copy2(latex_log, log_path / f"{shell}-latex-{latex_log.name}")
             else:
                 logger.info("No generated docs to copy..")
 
@@ -226,12 +248,26 @@ def entry_point():
 
         logger.info(
             f"Process completed with exit code: {sphinx.returncode}\n"
-            f"Log file is available in the following location: "
-            f"./target/bartleby/{transform_instance_context['shell']}.log"
+            f"Logs are available in the following location: "
+            f"./target/bartleby/logs/"
         )
 
         logger.info(f"nid_context: {nid_context}")
         logger.info(f"Transform_instance_context: {transform_instance_context}")
+
+        # A document that does not build is a failed transform. Until now the
+        # exit code was only logged, so the container exited 0 and every caller —
+        # the CLI, CI, the transform manager — reported a broken build as a
+        # success. Raising here happens after the logs and any partial output
+        # have been copied out, so the failure is diagnosable.
+        if sphinx.returncode != 0:
+            hint = f"See ./target/bartleby/logs/{shell}.log"
+            if warning_file.exists() and warning_file.stat().st_size > 0:
+                hint += f" and ./target/bartleby/logs/{warning_file.name}"
+            raise RuntimeError(
+                f"Document build failed: `{' '.join(cmd_ar)}` exited "
+                f"{sphinx.returncode}. {hint}"
+            )
 
     # install_doc_repo()
     do_transform()

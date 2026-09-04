@@ -39,8 +39,14 @@ else:
     release = f"{os.environ.get('HMD_CUSTOMER_CODE', 'HMD')}-{os.environ.get('HMD_DID', 'aaa')}"
 
 project = os.environ.get("DOCUMENT_TITLE", project)
-copyright = "{}, {}".format(datetime.date.today().year, company_name_acronym)
-author = "{}".format(company_name_acronym)
+# The footer reads "© Copyright <copyright>." Callers need the whole line, not
+# just the company inside a fixed format: a repository documenting someone else's
+# product needs their notice, and some need no year at all. HMD_DOC_COPYRIGHT
+# replaces the line outright; HMD_DOC_COMPANY_NAME still fills the default.
+copyright = os.environ.get("HMD_DOC_COPYRIGHT") or "{}, {}".format(
+    datetime.date.today().year, company_name_acronym
+)
+author = os.environ.get("HMD_DOC_AUTHOR") or "{}".format(company_name_acronym)
 
 # -- General configuration ---------------------------------------------------
 
@@ -229,9 +235,10 @@ default_logo = os.environ.get(
 if not default_logo:
     default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
 
-default_html_logo = os.environ.get("HTML_DEFAULT_LOGO", default_logo)
-
-default_html_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
+# These were the same variable, with the PDF value assigned second — so
+# HTML_DEFAULT_LOGO did nothing and the HTML sidebar logo was whatever
+# PDF_DEFAULT_LOGO said. They are separate settings and are now read separately.
+default_html_logo = os.environ.get("HTML_DEFAULT_LOGO") or default_logo
 
 if default_html_logo.startswith("http"):
     filename = default_html_logo.split("?")[0].split("/")[-1]
@@ -239,7 +246,7 @@ if default_html_logo.startswith("http"):
         resp = requests.get(default_html_logo, stream=True)
 
         if not resp.ok:
-            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {default_html_logo}")
+            raise Exception(f"Cannot download HTML logo {default_html_logo}")
 
         for chunk in resp.iter_content(1024):
             if not chunk:
@@ -337,6 +344,19 @@ for key, value in _global_conf_overrides.items():
 extra_config = transform_instance_context.get("config", {})
 for key, value in extra_config.items():
     globals()[key] = value
+
+# Sphinx and the theme have separate logo mechanisms, and both were live: this
+# file always set html_theme_options["logo"], which alabaster renders in its
+# sidebar, while a repository setting html_logo got Sphinx's own sidebar logo
+# block as well. The result was two logos stacked — the repository's above the
+# NeuronSphere default, with nothing turning the default off.
+#
+# A repository that sets html_logo means it, so the theme's logo steps aside.
+_repo_logo = globals().get("html_logo")
+_theme_options = globals().get("html_theme_options")
+if _repo_logo and isinstance(_theme_options, dict) and _theme_options.get("logo"):
+    _theme_options.pop("logo", None)
+    print(f"html_logo is set to {_repo_logo}; dropping the theme's default logo")
 
 # Support disable_default_styles flag from either level
 _disable_default_styles = globals().get("disable_default_styles", False)

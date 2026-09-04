@@ -2,9 +2,11 @@
 FROM python:3.13-slim AS deps
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl && \
-    curl -L "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" \
+    apt-get install -y --no-install-recommends curl unzip && \
+    curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
+      "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" \
       -o /plantuml.jar && \
+    unzip -t /plantuml.jar > /dev/null && \
     rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Runtime image with full texlive for broad PDF support
