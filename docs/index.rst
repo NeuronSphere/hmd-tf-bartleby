@@ -9,5 +9,6 @@ hmd-tf-bartleby
    :glob:
 
    transforms
+   requirements/index
    proposals/index
    data_template_test

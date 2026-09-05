@@ -22,6 +22,7 @@ services:
       CONFIDENTIALITY_STATEMENT: ${CONFIDENTIALITY_STATEMENT}
       NO_TIMESTAMP_TITLE: "true"
       DEFAULT_LOGO: ${DEFAULT_LOGO}
+      HMD_DOC_COPYRIGHT: ${HMD_DOC_COPYRIGHT:-}
     volumes:
       - type: bind
         source: "${HMD_REPO_PATH}/${TRANSFORM_INPUT}"

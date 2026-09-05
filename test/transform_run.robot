@@ -9,44 +9,51 @@ Variables         tx_vars.py
 *** Test Cases ***
 Test Bartleby Transform
     [Documentation]    Run transform template suite
+    [Tags]    REQ_BUILD_001    REQ_BUILD_002    REQ_BUILD_003
     [Template]    Test transform
     ${set_one}
     ${set_two}
 
 Confidentiality Statement Exists In PDF
-    [Tags]    confidentiality    dynamic_env
+    [Tags]    confidentiality    dynamic_env    REQ_BRAND_001
     Test transform    ${confidential_pdf_one}
     Should Contain Confidentiality Statement    ${confidential_pdf_one}[TRANSFORM_OUTPUT]/${confidential_pdf_one}[output_files][0]    ${confidential_pdf_one}[CONFIDENTIALITY_STATEMENT]
 
 Confidentiality Statement Is Dynamic
-    [Tags]    confidentiality    dynamic_env
+    [Tags]    confidentiality    dynamic_env    REQ_BRAND_002
     Test transform    ${confidential_pdf_two}
     Should Contain Confidentiality Statement    ${confidential_pdf_two}[TRANSFORM_OUTPUT]/${confidential_pdf_two}[output_files][0]    ${confidential_pdf_two}[CONFIDENTIALITY_STATEMENT]
 
 Default NeuronSphere Cover Image Is Used
-    [Tags]    logos    dynamic_env
+    [Tags]    logos    dynamic_env    REQ_BRAND_003
     Test Transform    ${default_cover_image}
     Should Contain Correct Cover Image    ${default_cover_image}[TRANSFORM_OUTPUT]/${default_cover_image}[output_files][1]    ${default_cover_image}[logo_file]
 
 Default NeuronSphere Cover Image Is Dynamic
-    [Tags]    logos    dynamic_env
+    [Tags]    logos    dynamic_env    REQ_BRAND_003
     Test Transform    ${default_pdf_cover_image}
     Should Contain Correct Cover Image    ${default_pdf_cover_image}[TRANSFORM_OUTPUT]/${default_pdf_cover_image}[output_files][1]    ${default_pdf_cover_image}[logo_file]
 
 Default NeuronSphere HTML Logo Is Used
-    [Tags]    logos    dynamic_env
+    [Tags]    logos    dynamic_env    REQ_BRAND_004
     Test Transform    ${html_logo_default}
     Should Contain Correct Cover Image    ${html_logo_default}[TRANSFORM_OUTPUT]/${html_logo_default}[output_files][0]    ${html_logo_default}[logo_file]
 
 Default NeuronSphere HTML Logo Is Dynamic
-    [Tags]    logos    dynamic_env
+    [Tags]    logos    dynamic_env    REQ_BRAND_004
     Test Transform    ${html_logo_dynamic}
     Should Contain Correct Cover Image    ${html_logo_dynamic}[TRANSFORM_OUTPUT]/${html_logo_dynamic}[output_files][0]    ${html_logo_dynamic}[logo_file]
 
 Root Document Is Dynamic
-    [Tags]    dynamic_env    root_doc
+    [Tags]    dynamic_env    root_doc    REQ_SEL_001
     Test transform    ${root_doc_change}
     Should Contain Correct Title    ${root_doc_change}[TRANSFORM_OUTPUT]/${root_doc_change}[output_files][0]    Test Docs
+
+Copyright Notice Is The Callers To Set
+    [Tags]    branding    dynamic_env    REQ_BRAND_006
+    Test transform    ${copyright_override}
+    ${page}=    Get File    ${copyright_override}[TRANSFORM_OUTPUT]/${copyright_override}[output_files][0]
+    Should Contain    ${page}    ${copyright_override}[HMD_DOC_COPYRIGHT]
 
 *** Keywords ***
 Test transform
@@ -74,6 +81,7 @@ Load Environment Variables
     Set Environment Variable    TRANSFORM_OUTPUT    ${env}[TRANSFORM_OUTPUT]
     Set Environment Variable    CONFIDENTIALITY_STATEMENT    ${env}[CONFIDENTIALITY_STATEMENT]
     Set Environment Variable    DEFAULT_LOGO    ${env}[DEFAULT_LOGO]
+    Set Environment Variable    HMD_DOC_COPYRIGHT    ${env.get("HMD_DOC_COPYRIGHT", "")}
 
 Do transform
     [Documentation]    Run transform container with expected volume mounts and env variables
@@ -91,4 +99,4 @@ Check output files
     END
 
 Reset Environment Variables
-    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT    VERSION    CONFIDENTIALITY_STATEMENT    DEFAULT_LOGO
+    Remove Environment Variable    TRANSFORM_INSTANCE_CONTEXT    TRANSFORM_NID    TRANSFORM_INPUT    TRANSFORM_OUTPUT    VERSION    CONFIDENTIALITY_STATEMENT    DEFAULT_LOGO    HMD_DOC_COPYRIGHT

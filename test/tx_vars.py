@@ -127,3 +127,20 @@ party without the prior written consent of HMD Labs.""",
     "output_files": [f"bartleby-test-{version}.pdf"],
     "logo_file": "NeuronSphere_Trios.png",
 }
+
+
+# The copyright notice is the caller's to set: HMD_DOC_COPYRIGHT replaces the
+# footer notice outright rather than substituting a company into a fixed
+# "<year>, <company>" shape.
+# The notice is a footer, which only the HTML builder renders — Sphinx's LaTeX
+# output does not carry the copyright at all.
+copyright_override = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "html"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_copyright",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "HMD_DOC_COPYRIGHT": "2026 Example Corp, all rights reserved",
+    "output_files": ["html/index.html"],
+}
