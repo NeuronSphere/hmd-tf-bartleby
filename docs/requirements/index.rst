@@ -35,6 +35,8 @@ itself worth pinning down, a ``.. spec::`` item links to it.
      - The confidentiality statement, logos, and the copyright notice.
    * - ``SEL``
      - Choosing the root document and the builder to run.
+   * - ``CONV``
+     - Converting the rendered documentation to Word and PowerPoint.
 
 **Tests declare their own coverage**, in the test source rather than in a
 separate list that would drift. This repository's tests are Robot suites, which
@@ -80,4 +82,5 @@ not belong in a requirements baseline.
    build
    brand
    selection
+   conversion
    traceability

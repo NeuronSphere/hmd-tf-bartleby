@@ -16,6 +16,24 @@ RUN apt-get update && \
     echo "${PLANTUML_SHA256}  /plantuml.jar" | sha256sum -c - && \
     rm -rf /var/lib/apt/lists/*
 
+# Pandoc converts the rendered documentation to Word and PowerPoint, which
+# Sphinx has no writer for. The .deb is per-architecture, so both checksums are
+# pinned and the wrong one fails the build rather than installing silently.
+ARG PANDOC_VERSION=3.11
+ARG PANDOC_SHA256_AMD64=89d4c9d97818c62a97157f0072844e4602c6cee795bf84abd1aee7273abcda99
+ARG PANDOC_SHA256_ARM64=d03e1be90fa510aaddc9b1e17f3e4615de0ab8a0aa7e7553502a3c9701887730
+
+RUN arch="$(dpkg --print-architecture)" && \
+    case "$arch" in \
+      amd64) sha="${PANDOC_SHA256_AMD64}" ;; \
+      arm64) sha="${PANDOC_SHA256_ARM64}" ;; \
+      *) echo "no pinned pandoc checksum for $arch" >&2; exit 1 ;; \
+    esac && \
+    curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
+      "https://github.com/jgm/pandoc/releases/download/${PANDOC_VERSION}/pandoc-${PANDOC_VERSION}-1-${arch}.deb" \
+      -o /pandoc.deb && \
+    echo "${sha}  /pandoc.deb" | sha256sum -c -
+
 # Stage 2: Runtime image with full texlive for broad PDF support
 #
 # The tag tracks the newest sphinx-latexpdf image, which is 8.2.3; requirements
@@ -28,6 +46,9 @@ RUN apt-get update && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=deps /plantuml.jar /usr/local/bin/plantuml.jar
+COPY --from=deps /pandoc.deb /tmp/pandoc.deb
+RUN dpkg -i /tmp/pandoc.deb && rm /tmp/pandoc.deb
+
 
 COPY src/docker/doctools /hmd_transform/doctools
 COPY meta-data /meta-data

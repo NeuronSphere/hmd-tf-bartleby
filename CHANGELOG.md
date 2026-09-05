@@ -1,5 +1,34 @@
 # Changelog
 
+## 2026-09-05 — Word and PowerPoint
+
+- feat: `docx` and `pptx` builders, converting the rendered documentation with
+  pandoc 3.11. Sphinx has no writer for either and every community docx
+  extension is abandoned — `docxbuilder` last released in 2020, and there is no
+  pptx extension at all. Both outputs are named like the PDF and lifted to the
+  top of the output directory. `HMD_DOC_REFERENCE_DOCX` and
+  `HMD_DOC_REFERENCE_PPTX` name a document whose styles the output adopts.
+  See NERD005.
+- fix: the conversion reads an extracted document body, not the rendered page.
+  pandoc converts a whole page, so the themed output put the sidebar, the search
+  box and the `¶` heading permalinks into the Word document — and in PowerPoint
+  the theme's own `<h1>` outranked the document title and took the first slide.
+- fix: `<section>` wrappers are removed before conversion. Sphinx wraps every
+  section in one, pandoc reads it as a Div, and a heading inside a Div starts no
+  slide — so the entire document arrived on a single slide whatever
+  `--slide-level` said. Both defects exited zero and produced plausible files;
+  they were found by inspecting the documents, not by a build failing.
+- feat: a requirements baseline for the transform, and `reqtrace` wired in as
+  `make reqs` / `make reqs-check` / `make check`. Nineteen requirements across
+  BUILD, BRAND, SEL and CONV; the Robot suite carries the IDs it verifies.
+- feat: the Robot suite covers the copyright override and the two new builders —
+  twelve cases, up from eight. `resources/OfficeChecks.py` reads the produced
+  `.docx` and `.pptx` with nothing outside the standard library.
+- fix: `meta-data/manifest.json` had `"name": "repo_name"` from a template. That
+  is the document title and the requirement ID prefix, so this repository's own
+  documents were titled "repo_name".
+
+
 ## 2026-09-05
 
 Dependency upgrade cycle. Verified against the requirements-heavy docs in

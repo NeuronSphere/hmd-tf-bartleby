@@ -72,6 +72,23 @@ Setting `html_logo` replaces the logo rather than adding to it: the theme's own
 default steps aside, and the build log says which logo it kept. Note the footer
 renders `©` immediately before your string, so include any spacing you want.
 
+### Word and PowerPoint
+
+The `docx` and `pptx` builders convert the rendered documentation with pandoc,
+which Sphinx has no writer for. Both are named like the PDF and land at the top
+of the output directory.
+
+| Variable | Effect |
+|----------|--------|
+| `HMD_DOC_REFERENCE_DOCX` | A `.docx` whose styles the Word output adopts |
+| `HMD_DOC_REFERENCE_PPTX` | A `.pptx` whose layouts the deck adopts |
+
+Paths are inside the container, so `/hmd_transform/input/…` reaches the
+repository being built. Without a reference document, pandoc's defaults apply.
+
+Each section of the document starts a new slide. `PPTX_SLIDE_LEVEL` changes
+which heading level does that; it defaults to 2.
+
 ### Logs
 
 Everything needed to diagnose a build lands in `/hmd_transform/output/logs/`,

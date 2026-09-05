@@ -20,6 +20,11 @@ RUN apt-get update && \
 
 COPY plantuml.jar /usr/local/bin/plantuml.jar
 
+# Pandoc, staged by the Makefile for this architecture, for the docx and pptx
+# builders. Same reason as the jar: no download during a local rebuild.
+COPY pandoc.deb /tmp/pandoc.deb
+RUN dpkg -i /tmp/pandoc.deb && rm /tmp/pandoc.deb
+
 COPY doctools /hmd_transform/doctools
 COPY requirements.txt .
 

@@ -4,6 +4,7 @@ Force Tags        Transform run
 Library           Process
 Library           OperatingSystem
 Library           resources.PdfChecks.PdfChecks
+Library           resources.OfficeChecks.OfficeChecks
 Variables         tx_vars.py
 
 *** Test Cases ***
@@ -54,6 +55,31 @@ Copyright Notice Is The Callers To Set
     Test transform    ${copyright_override}
     ${page}=    Get File    ${copyright_override}[TRANSFORM_OUTPUT]/${copyright_override}[output_files][0]
     Should Contain    ${page}    ${copyright_override}[HMD_DOC_COPYRIGHT]
+
+Word Document Is Produced
+    [Tags]    pandoc    docx    REQ_CONV_001    REQ_CONV_003
+    Test transform    ${docx_output}
+    Docx Should Contain    ${docx_output}[TRANSFORM_OUTPUT]/${docx_output}[output_files][0]    Bartleby Transform Test
+
+Converted Output Leaves The Theme Behind
+    [Tags]    pandoc    docx    REQ_CONV_004    REQ_CONV_004_SPEC001
+    Test transform    ${docx_output}
+    ${file}=    Set Variable    ${docx_output}[TRANSFORM_OUTPUT]/${docx_output}[output_files][0]
+    # The permalink glyph Sphinx puts on every heading, and the sidebar's own
+    # headings — pandoc converts a whole page, so both arrive unless stripped.
+    Docx Should Not Contain    ${file}    ¶
+    Docx Should Not Contain    ${file}    Quick search
+    Docx Should Not Contain    ${file}    Navigation
+
+Slide Deck Is Produced One Slide Per Section
+    [Tags]    pandoc    pptx    REQ_CONV_002    REQ_CONV_003    REQ_CONV_004_SPEC001
+    Test transform    ${pptx_output}
+    ${file}=    Set Variable    ${pptx_output}[TRANSFORM_OUTPUT]/${pptx_output}[output_files][0]
+    ${slides}=    Count Slides    ${file}
+    # Sphinx wraps sections in <section>, which pandoc reads as a Div; a heading
+    # inside a Div starts no slide, so the whole deck collapses to one page.
+    Should Be True    ${slides} > 1    The deck has ${slides} slide(s); the sections did not split
+    Slides Should Contain    ${file}    Indices and tables
 
 *** Keywords ***
 Test transform

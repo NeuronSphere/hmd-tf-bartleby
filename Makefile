@@ -18,6 +18,7 @@ PUBLISHED ?= ghcr.io/neuronsphere/hmd-tf-bartleby:stable
 
 CONTEXT := target/docker-context
 JAR     := target/plantuml.jar
+DEB     := target/pandoc.deb
 
 # Kept in step with the ARG default in src/docker/Dockerfile. Only used when
 # neither the published image nor a Homebrew copy can supply the jar.
@@ -26,13 +27,19 @@ JAR     := target/plantuml.jar
 #   make reqs REQTRACE="go run github.com/neuronsphere/hmd-cli-bartleby/src/go/reqtrace/cmd/reqtrace@latest"
 REQTRACE ?= reqtrace
 
+PANDOC_VERSION ?= 3.11
+PANDOC_SHA256_amd64 := 89d4c9d97818c62a97157f0072844e4602c6cee795bf84abd1aee7273abcda99
+PANDOC_SHA256_arm64 := d03e1be90fa510aaddc9b1e17f3e4615de0ab8a0aa7e7553502a3c9701887730
+DEB_ARCH := $(shell uname -m | sed 's/x86_64/amd64/;s/aarch64/arm64/')
+PANDOC_SHA256 := $(PANDOC_SHA256_$(DEB_ARCH))
+
 PLANTUML_VERSION ?= 1.2026.7
 PLANTUML_SHA256  ?= 33aa7ed0ca843e300690230d09268e1f526fdde7e86fecdfa39fb80412cafcde
 
 # shasum on macOS, sha256sum on most Linux.
 SHA256 := $(shell command -v shasum > /dev/null 2>&1 && echo "shasum -a 256" || echo sha256sum)
 
-.PHONY: help image-local context jar jar-verify smoke test reqs reqs-check check clean
+.PHONY: help image-local context jar jar-verify pandoc smoke test reqs reqs-check check clean
 
 ## help: show this help
 help:
@@ -72,8 +79,23 @@ jar-verify:
 		exit 1; \
 	fi
 
+## pandoc: cache the pandoc .deb for this architecture
+pandoc: $(DEB)
+
+$(DEB):
+	@mkdir -p $(dir $(DEB))
+	@test -n "$(PANDOC_SHA256)" || { echo "no pinned pandoc checksum for $(DEB_ARCH)"; exit 1; }
+	curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
+	  "https://github.com/jgm/pandoc/releases/download/$(PANDOC_VERSION)/pandoc-$(PANDOC_VERSION)-1-$(DEB_ARCH).deb" \
+	  -o $(DEB)
+	@actual=$$($(SHA256) $(DEB) | cut -d" " -f1); \
+	if [ "$$actual" != "$(PANDOC_SHA256)" ]; then \
+		echo "$(DEB) does not match the pinned checksum (got $$actual)"; exit 1; \
+	fi
+	@echo "pandoc $(PANDOC_VERSION) $(DEB_ARCH) ok"
+
 ## context: stage the flattened build context under target/docker-context
-context: $(JAR)
+context: $(JAR) $(DEB)
 	@rm -rf $(CONTEXT)
 	@mkdir -p $(CONTEXT)
 	cp -R src/docker/doctools $(CONTEXT)/doctools
@@ -82,6 +104,7 @@ context: $(JAR)
 	cp src/docker/entrypoint.py src/docker/entry_puml.py $(CONTEXT)/
 	cp src/docker/Dockerfile.dev $(CONTEXT)/Dockerfile
 	cp $(JAR) $(CONTEXT)/plantuml.jar
+	cp $(DEB) $(CONTEXT)/pandoc.deb
 	@# The published requirements pin the transform's own package from the private
 	@# index. Locally the package is installed from source instead, so that pin is
 	@# dropped and no index credentials are needed.
@@ -131,7 +154,8 @@ check: reqs-check
 smoke:
 	docker run --rm --entrypoint sphinx-build $(IMAGE):$(TAG) --version
 	docker run --rm --entrypoint java $(IMAGE):$(TAG) -jar /usr/local/bin/plantuml.jar -version | head -2
+	docker run --rm --entrypoint pandoc $(IMAGE):$(TAG) --version | head -1
 
 ## clean: remove the staged context and the cached jar
 clean:
-	rm -rf $(CONTEXT) $(JAR)
+	rm -rf $(CONTEXT) $(JAR) $(DEB)

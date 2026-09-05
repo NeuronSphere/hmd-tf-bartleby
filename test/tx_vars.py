@@ -144,3 +144,27 @@ copyright_override = {
     "HMD_DOC_COPYRIGHT": "2026 Example Corp, all rights reserved",
     "output_files": ["html/index.html"],
 }
+
+
+# Word and PowerPoint come from pandoc rather than Sphinx, so they are worth
+# testing on their own: the failure modes are the theme's furniture leaking in
+# and the slides not splitting.
+docx_output = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "docx"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_docx",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [f"bartleby-test-{version}.docx"],
+}
+
+pptx_output = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "pptx"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_pptx",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [f"bartleby-test-{version}.pptx"],
+}

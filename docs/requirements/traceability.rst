@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-13 requirement items, verified by 0 Go tests and 9 Robot tests.
+19 requirement items, verified by 0 Go tests and 12 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -38,6 +38,18 @@ Summary
      - 5
      - 3
      - 2
+   * - CONV
+     - 4
+     - 5
+     - 0
+   * - CONV_001
+     - 1
+     - 0
+     - 1
+   * - CONV_004
+     - 1
+     - 2
+     - 0
    * - SEL
      - 1
      - 1
@@ -89,6 +101,24 @@ Coverage by requirement
    * - :need:`HMD_TF_BARTLEBY_REQ_BUILD_005`
      - *exempt: see the requirement text*
      - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_001`
+     - transform_run: Word Document Is Produced
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_001_SPEC001`
+     - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_002`
+     - transform_run: Slide Deck Is Produced One Slide Per Section
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_003`
+     - transform_run: Slide Deck Is Produced One Slide Per Section, transform_run: Word Document Is Produced
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_004`
+     - transform_run: Converted Output Leaves The Theme Behind
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_CONV_004_SPEC001`
+     - transform_run: Converted Output Leaves The Theme Behind, transform_run: Slide Deck Is Produced One Slide Per Section
+     - implemented
    * - :need:`HMD_TF_BARTLEBY_REQ_SEL_001`
      - transform_run: Root Document Is Dynamic
      - implemented
@@ -134,61 +164,82 @@ Robot Framework tests
     :links: HMD_TF_BARTLEBY_REQ_BRAND_001
     :tags: robot
 
-    ``test/transform_run.robot:17``
+    ``test/transform_run.robot:18``
 
 .. test:: transform_run: Confidentiality Statement Is Dynamic
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_3F1B067F
     :links: HMD_TF_BARTLEBY_REQ_BRAND_002
     :tags: robot
 
-    ``test/transform_run.robot:22``
+    ``test/transform_run.robot:23``
+
+.. test:: transform_run: Converted Output Leaves The Theme Behind
+    :id: HMD_TF_BARTLEBY_TEST_ROBOT_A84BE866
+    :links: HMD_TF_BARTLEBY_REQ_CONV_004, HMD_TF_BARTLEBY_REQ_CONV_004_SPEC001
+    :tags: robot
+
+    ``test/transform_run.robot:64``
 
 .. test:: transform_run: Copyright Notice Is The Callers To Set
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_5AD973E0
     :links: HMD_TF_BARTLEBY_REQ_BRAND_006
     :tags: robot
 
-    ``test/transform_run.robot:52``
+    ``test/transform_run.robot:53``
 
 .. test:: transform_run: Default NeuronSphere Cover Image Is Dynamic
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_29D03C01
     :links: HMD_TF_BARTLEBY_REQ_BRAND_003
     :tags: robot
 
-    ``test/transform_run.robot:32``
+    ``test/transform_run.robot:33``
 
 .. test:: transform_run: Default NeuronSphere Cover Image Is Used
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_974B22E5
     :links: HMD_TF_BARTLEBY_REQ_BRAND_003
     :tags: robot
 
-    ``test/transform_run.robot:27``
+    ``test/transform_run.robot:28``
 
 .. test:: transform_run: Default NeuronSphere HTML Logo Is Dynamic
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_01AD974B
     :links: HMD_TF_BARTLEBY_REQ_BRAND_004
     :tags: robot
 
-    ``test/transform_run.robot:42``
+    ``test/transform_run.robot:43``
 
 .. test:: transform_run: Default NeuronSphere HTML Logo Is Used
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_77B17A37
     :links: HMD_TF_BARTLEBY_REQ_BRAND_004
     :tags: robot
 
-    ``test/transform_run.robot:37``
+    ``test/transform_run.robot:38``
 
 .. test:: transform_run: Root Document Is Dynamic
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_D7FDBC25
     :links: HMD_TF_BARTLEBY_REQ_SEL_001
     :tags: robot
 
-    ``test/transform_run.robot:47``
+    ``test/transform_run.robot:48``
+
+.. test:: transform_run: Slide Deck Is Produced One Slide Per Section
+    :id: HMD_TF_BARTLEBY_TEST_ROBOT_FEE8A8FC
+    :links: HMD_TF_BARTLEBY_REQ_CONV_002, HMD_TF_BARTLEBY_REQ_CONV_003, HMD_TF_BARTLEBY_REQ_CONV_004_SPEC001
+    :tags: robot
+
+    ``test/transform_run.robot:74``
 
 .. test:: transform_run: Test Bartleby Transform
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_CFB06968
     :links: HMD_TF_BARTLEBY_REQ_BUILD_001, HMD_TF_BARTLEBY_REQ_BUILD_002, HMD_TF_BARTLEBY_REQ_BUILD_003
     :tags: robot
 
-    ``test/transform_run.robot:10``
+    ``test/transform_run.robot:11``
+
+.. test:: transform_run: Word Document Is Produced
+    :id: HMD_TF_BARTLEBY_TEST_ROBOT_E8C8FB94
+    :links: HMD_TF_BARTLEBY_REQ_CONV_001, HMD_TF_BARTLEBY_REQ_CONV_003
+    :tags: robot
+
+    ``test/transform_run.robot:59``
 
