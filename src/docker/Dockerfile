@@ -1,15 +1,26 @@
 # Stage 1: Download build artifacts in a lightweight throwaway image
 FROM python:3.13-slim AS deps
 
+# PlantUML comes from its GitHub release rather than the SourceForge mirror,
+# which is slow and has been known to serve an HTML error page in place of the
+# jar. The checksum is what makes that safe to rely on: a truncated or
+# substituted download fails the build here instead of at render time.
+ARG PLANTUML_VERSION=1.2026.7
+ARG PLANTUML_SHA256=33aa7ed0ca843e300690230d09268e1f526fdde7e86fecdfa39fb80412cafcde
+
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends curl unzip && \
+    apt-get install -y --no-install-recommends curl && \
     curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
-      "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" \
+      "https://github.com/plantuml/plantuml/releases/download/v${PLANTUML_VERSION}/plantuml-${PLANTUML_VERSION}.jar" \
       -o /plantuml.jar && \
-    unzip -t /plantuml.jar > /dev/null && \
+    echo "${PLANTUML_SHA256}  /plantuml.jar" | sha256sum -c - && \
     rm -rf /var/lib/apt/lists/*
 
 # Stage 2: Runtime image with full texlive for broad PDF support
+#
+# The tag tracks the newest sphinx-latexpdf image, which is 8.2.3; requirements
+# then upgrade Sphinx over it. Those two numbers are meant to differ — do not
+# "fix" the mismatch by pinning Sphinx back to the base image's version.
 FROM sphinxdoc/sphinx-latexpdf:8.2.3
 
 RUN apt-get update && \

@@ -1,5 +1,46 @@
 # Changelog
 
+## 2026-09-05
+
+Dependency upgrade cycle. Verified against the requirements-heavy docs in
+`hmd-cli-bartleby` (122 sphinx-needs items) and a fixture exercising the
+builders those docs do not: HTML, PDF, RevealJS, and PlantUML all build with
+**zero warnings**, and the Robot suite passes 8/8 against the rebuilt image.
+
+- feat: Sphinx 8.2.3 → **9.1.0**. The `sphinxdoc/sphinx-latexpdf` base image has
+  no 9.x tag, so it stays at 8.2.3 and requirements upgrade Sphinx over it. Those
+  two version numbers are meant to differ; the Dockerfiles say so.
+- feat: sphinx-needs 6.3.0 → **8.5.0**, two majors. Nothing in the existing
+  `req`/`spec`/`needtable` usage or the `needs_id_regex` and `needs_warnings`
+  config broke; 8.x adds schema validation, which passes clean.
+- feat: myst-parser 5.0.0 → 5.1.0, sphinxcontrib-confluencebuilder 3.0.0 → 3.2.0,
+  `requests` pinned at 2.34.2 rather than floating.
+- feat: PlantUML **1.2023.7 → 1.2026.7**, three years of releases, and now
+  downloaded from its GitHub release rather than the SourceForge mirror the
+  Makefile already described as "often slow and sometimes serves an HTML error
+  page instead". The download is checksum-verified, so a truncated or
+  substituted jar fails the build rather than surfacing at render time.
+- fix: `make image-local` preferred the jar from the published image, which
+  carries whatever PlantUML it was built with — so a version bump here would
+  have been silently ignored locally. The cached jar is now checked against
+  `PLANTUML_SHA256` and re-downloaded when it does not match.
+- fix: every build emitted two warnings about `_static/SourceSansPro/OFL.txt`, a
+  font licence that MyST parsed as a document. `_static` is excluded from source
+  discovery; static assets still copy.
+- fix: dropped `roman-numerals-py<4`. That distribution is deprecated in favour
+  of `roman-numerals`, which is what Sphinx 9 depends on, so the cap constrained
+  a package nothing was asking for.
+- fix: dropped `when-changed==0.3.0`. A 2016 file-watcher that nothing in the
+  repository referenced.
+- feat: `make test` runs the Robot suite against a locally built image. Two
+  things it needs were easy to lose: `--pythonpath`, because newer Robot
+  Framework no longer adds the suite's directory to `sys.path` and the
+  PDF-checking library lives in `test/resources`, and `TRANSFORM_IMAGE`, which
+  the compose file now honours — previously the suite could only test the
+  published image. The compose default also points at `neuronsphere` rather than
+  the old `hmdlabs` path, and the obsolete `version:` key is gone.
+
+
 ## 2026-09-04
 
 - feat: `HMD_DOC_COPYRIGHT` replaces the footer notice outright, and

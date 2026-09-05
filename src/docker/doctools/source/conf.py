@@ -209,7 +209,10 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+# _static holds assets, not documents. The font licence in there is a .txt that
+# MyST happily parses as a document, which put two warnings in every build every
+# consumer has ever run.
+exclude_patterns = ["_static/**"]
 
 # path to jar file used for generating puml diagrams
 plantuml = "java -jar /usr/local/bin/plantuml.jar"

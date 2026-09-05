@@ -1,7 +1,11 @@
-version: "3.2"
+# `version:` is obsolete in Compose v2 and only produces a warning.
 services:
   transform_test:
-    image: ghcr.io/hmdlabs/hmd-tf-bartleby:${VERSION}
+    # TRANSFORM_IMAGE lets the suite run against a locally built image:
+    #   TRANSFORM_IMAGE=hmd-tf-bartleby:local robot transform_run.robot
+    # Without it the published image is used, as before. The default org is
+    # neuronsphere; the old hmdlabs path is where this image used to live.
+    image: ${TRANSFORM_IMAGE:-ghcr.io/neuronsphere/hmd-tf-bartleby:${VERSION}}
     container_name: transform-test
     environment:
       HMD_INSTANCE_NAME: transform-int-test

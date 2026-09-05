@@ -19,7 +19,15 @@ PUBLISHED ?= ghcr.io/neuronsphere/hmd-tf-bartleby:stable
 CONTEXT := target/docker-context
 JAR     := target/plantuml.jar
 
-.PHONY: help image-local context jar smoke clean
+# Kept in step with the ARG default in src/docker/Dockerfile. Only used when
+# neither the published image nor a Homebrew copy can supply the jar.
+PLANTUML_VERSION ?= 1.2026.7
+PLANTUML_SHA256  ?= 33aa7ed0ca843e300690230d09268e1f526fdde7e86fecdfa39fb80412cafcde
+
+# shasum on macOS, sha256sum on most Linux.
+SHA256 := $(shell command -v shasum > /dev/null 2>&1 && echo "shasum -a 256" || echo sha256sum)
+
+.PHONY: help image-local context jar jar-verify smoke test clean
 
 ## help: show this help
 help:
@@ -28,26 +36,36 @@ help:
 ## jar: cache plantuml.jar locally, preferring a copy already on this machine
 jar: $(JAR)
 
-# The published image carries the exact jar the released image uses, and pulling
-# it out of a local image beats re-downloading 11 MB from a mirror that is often
-# slow and sometimes serves an HTML error page instead.
+# The jar is checksum-verified against PLANTUML_SHA256, which is what makes the
+# fast path safe: pulling it out of a local image beats re-downloading 30 MB,
+# but the published image carries whatever jar it was built with — so when that
+# is a different version, the checksum fails and we fall through to the
+# download instead of quietly building against the wrong PlantUML.
 $(JAR):
 	@mkdir -p $(dir $(JAR))
 	@if docker image inspect $(PUBLISHED) > /dev/null 2>&1; then \
-		echo "extracting plantuml.jar from $(PUBLISHED)"; \
+		echo "trying plantuml.jar from $(PUBLISHED)"; \
 		cid=$$(docker create $(PUBLISHED)) && \
-		docker cp $$cid:/usr/local/bin/plantuml.jar $(JAR) && \
+		docker cp $$cid:/usr/local/bin/plantuml.jar $(JAR) 2>/dev/null; \
 		docker rm $$cid > /dev/null; \
-	elif [ -f /opt/homebrew/opt/plantuml/libexec/plantuml.jar ]; then \
-		echo "using the Homebrew plantuml.jar"; \
-		cp /opt/homebrew/opt/plantuml/libexec/plantuml.jar $(JAR); \
-	else \
-		echo "downloading plantuml.jar"; \
-		curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
-		  "https://sourceforge.net/projects/plantuml/files/1.2023.7/plantuml.1.2023.7.jar/download" \
-		  -o $(JAR); \
 	fi
-	@unzip -t $(JAR) > /dev/null && echo "plantuml.jar ok"
+	@if ! $(MAKE) -s jar-verify 2>/dev/null; then \
+		echo "downloading plantuml.jar $(PLANTUML_VERSION)"; \
+		curl -fL --retry 5 --retry-delay 2 --retry-all-errors --connect-timeout 20 \
+		  "https://github.com/plantuml/plantuml/releases/download/v$(PLANTUML_VERSION)/plantuml-$(PLANTUML_VERSION).jar" \
+		  -o $(JAR); \
+		$(MAKE) -s jar-verify; \
+	fi
+	@echo "plantuml.jar $(PLANTUML_VERSION) ok"
+
+## jar-verify: fail unless the cached jar matches PLANTUML_SHA256
+jar-verify:
+	@test -f $(JAR) || { echo "no $(JAR)"; exit 1; }
+	@actual=$$($(SHA256) $(JAR) | cut -d" " -f1); \
+	if [ "$$actual" != "$(PLANTUML_SHA256)" ]; then \
+		echo "$(JAR) is not PlantUML $(PLANTUML_VERSION) (sha256 $$actual)"; \
+		exit 1; \
+	fi
 
 ## context: stage the flattened build context under target/docker-context
 context: $(JAR)
@@ -73,6 +91,22 @@ image-local: context
 	@echo
 	@echo "Built $(IMAGE):$(TAG). Use it with:"
 	@echo "    bartleby --image $(IMAGE):$(TAG) html"
+
+## test: run the Robot suite against $(IMAGE):$(TAG)
+#
+# Two things the suite needs that are easy to lose: --pythonpath, because newer
+# Robot Framework no longer puts the suite's own directory on sys.path and the
+# PDF-checking library lives in ./resources, and TRANSFORM_IMAGE, without which
+# it tests the published image rather than the one you just built.
+#
+# ROBOT defaults to uvx so the suite's dependencies (PyMuPDF for reading the
+# rendered PDFs) need not be installed globally. Override it to use your own:
+#   make test ROBOT="python3 -m robot"
+ROBOT ?= uvx --from robotframework --with pymupdf --with pyyaml robot
+
+test:
+	cd test && HMD_REPO_PATH="$$PWD" VERSION=$(TAG) TRANSFORM_IMAGE=$(IMAGE):$(TAG) \
+	  $(ROBOT) --pythonpath . --outputdir results transform_run.robot
 
 ## smoke: check the image runs and report the Sphinx and PlantUML it will use
 smoke:

@@ -17,10 +17,29 @@ cd ../some-docs-repo
 bartleby --image hmd-tf-bartleby:local html
 ```
 
-`make image-local` needs no network and no private index credentials: it takes
-`plantuml.jar` from an image already on this machine and installs the transform's
-Python package from source. A code-only change rebuilds in seconds. `make help`
-lists the rest of the targets; `make smoke` checks the built image runs.
+`make image-local` needs no private index credentials: it installs the
+transform's Python package from source, and takes `plantuml.jar` from an image
+already on this machine when that copy matches the pinned version — otherwise it
+downloads and checksum-verifies it. A code-only change rebuilds in seconds.
+`make help` lists the rest of the targets; `make smoke` reports the Sphinx and
+PlantUML the built image will use.
+
+### Tests
+
+```bash
+make test                      # Robot suite against hmd-tf-bartleby:local
+make test TAG=other            # or another local tag
+```
+
+The suite renders through the container and checks the results, including
+reading the produced PDFs for the confidentiality statement and the cover logo.
+It needs Docker and Compose; `ROBOT` defaults to `uvx`, so its Python
+dependencies need not be installed globally.
+
+Worth knowing what it does *not* cover: the Confluence builder, and the branding
+environment variables. Renders of a real repository are the check for those —
+`../hmd-cli-bartleby` is a good target, since its documentation is dense with
+sphinx-needs items.
 
 ## Interface
 
