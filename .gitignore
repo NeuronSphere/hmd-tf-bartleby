@@ -152,3 +152,6 @@ target/bartleby/
 # Staged docker build contexts and the cached plantuml.jar (make image-local)
 target/
 STDOUT
+test/results*/
+test/run-transform.log
+test/output_files*/

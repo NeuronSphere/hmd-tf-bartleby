@@ -230,10 +230,12 @@ def entry_point():
                     dst=output_content_path,
                     dirs_exist_ok=True,
                 )
-                if shell == "pdf":
-                    pdfs = output_content_path.rglob("latex/*.pdf")
-                    for pdf in pdfs:
-                        shutil.copy2(pdf, output_content_path / pdf.name)
+                # The document itself is what the caller wants; the rest of
+                # the build tree is scaffolding. Lift it to the top of the
+                # output so it does not have to be dug out of latex/ or docx/.
+                for pattern in ("latex/*.pdf", "docx/*.docx", "pptx/*.pptx"):
+                    for artifact in output_content_path.rglob(pattern):
+                        shutil.copy2(artifact, output_content_path / artifact.name)
 
                 # LaTeX explains PDF failures that Sphinx cannot: an undefined
                 # control sequence, a missing font, a box it could not set. That

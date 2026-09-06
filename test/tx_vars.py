@@ -127,3 +127,58 @@ party without the prior written consent of HMD Labs.""",
     "output_files": [f"bartleby-test-{version}.pdf"],
     "logo_file": "NeuronSphere_Trios.png",
 }
+
+
+# The copyright notice is the caller's to set: HMD_DOC_COPYRIGHT replaces the
+# footer notice outright rather than substituting a company into a fixed
+# "<year>, <company>" shape.
+# The notice is a footer, which only the HTML builder renders — Sphinx's LaTeX
+# output does not carry the copyright at all.
+copyright_override = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "html"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_copyright",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "HMD_DOC_COPYRIGHT": "2026 Example Corp, all rights reserved",
+    "output_files": ["html/index.html"],
+}
+
+
+# Word and PowerPoint come from pandoc rather than Sphinx, so they are worth
+# testing on their own: the failure modes are the theme's furniture leaking in
+# and the slides not splitting.
+docx_output = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "docx"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_docx",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [f"bartleby-test-{version}.docx"],
+}
+
+pptx_output = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "pptx"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_pptx",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [f"bartleby-test-{version}.pptx"],
+}
+
+
+# 192.0.2.0/24 is TEST-NET-1, reserved by RFC 5737 and not routable, so the
+# connection attempt cannot succeed anywhere — which is the point: the build has
+# to give up on its own rather than wait for a network that never answers.
+unreachable_logo = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "html"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_unreachable",
+    "DEFAULT_LOGO": "http://192.0.2.1/logo.png",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [],
+}

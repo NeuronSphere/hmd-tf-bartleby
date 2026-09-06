@@ -1,5 +1,129 @@
 # Changelog
 
+## 2026-09-05 — Word and PowerPoint
+
+### A documentation build could hang forever
+
+Found by the upgrade cycle's own test run, which spent **61 minutes** inside
+`make html` before failing — and whose only visible symptom was a missing output
+file.
+
+- fix: `conf.py` fetched a logo given as a URL with `requests.get(...)` and **no
+  timeout**, so an unresponsive host blocked the build indefinitely. The fetch
+  is now bounded at `(5, 30)` and a failure is an error naming the URL and the
+  reason. Being network-dependent, it was intermittent: the same suite passed
+  12/12 an hour earlier.
+- fix: the download opened the destination file *before* the request, so a
+  failure left a zero-byte image behind that the build would then use as the
+  logo. It is written beside it and moved into place only once complete.
+- feat: `REQ_BRAND_007`, covered by a test that points the logo at `192.0.2.1`
+  — TEST-NET-1, which RFC 5737 reserves and nothing routes — and requires the
+  build to fail in under two minutes rather than wait.
+- fix: the Robot suite could not see a failed transform. `docker-compose up`
+  exits 0 however the container ended, so every case's `rc == 0` assertion was
+  vacuous and the hour-long failure surfaced only as an absent file. It now runs
+  with `--exit-code-from`.
+
+### Package currency
+
+The previous entry updated the *pinned* requirements, which is not the same as
+updating the image. `pip install -r` only upgrades what the file names, so every
+transitive dependency stayed at whatever the base image installed:
+`pip list --outdated` on the built image reported **16** stale packages,
+including `certifi` from January 2025, `urllib3`, and `pillow`.
+
+- fix: `--upgrade-strategy eager`, so dependencies are upgraded too and not just
+  the packages named in `requirements.in`. Sixteen stale packages became two,
+  both capped by a constraint rather than missed: `docutils` stops at 0.22.4
+  because Sphinx 9.1 requires `<0.23`, and `jsonschema-rs` at 0.52.1 because
+  sphinx-needs 8.5.0 requires `<0.53.0`.
+- fix: `pillow` is pinned. Nothing in the requirement graph referenced it — the
+  base image installs it and Sphinx uses it for images — so nothing kept it
+  current, and Pillow is where the image-parsing CVEs live. 11.1.0 → 12.3.0.
+- fix: removed the deprecated `roman-numerals-py`, which was installed alongside
+  its replacement `roman-numerals`. **Both install the same `roman_numerals`
+  module**, so which one answered `import roman_numerals` depended on install
+  order. Uninstalling the deprecated distribution deletes the shared module
+  files out from under the current one — confirmed, it leaves
+  `ModuleNotFoundError` — so the Dockerfiles remove and reinstall in one layer.
+- fix: OS packages are upgraded within bookworm. `apt list --upgradable` in the
+  published image reported **68**, including `bash`, `dpkg`, `base-files` and
+  `ca-certificates` — the base image ships whatever its packages were the day it
+  was built and nothing since.
+- The runtime Python stays at **3.13.2**, which is the base image's. There is no
+  `sphinxdoc/sphinx-latexpdf` tag beyond 8.2.3, so moving to 3.14 means building
+  our own texlive base — the thing that base image exists to avoid. The
+  throwaway download stage moved to `python:3.14-slim`, which affects nothing at
+  runtime.
+
+- feat: `docx` and `pptx` builders, converting the rendered documentation with
+  pandoc 3.11. Sphinx has no writer for either and every community docx
+  extension is abandoned — `docxbuilder` last released in 2020, and there is no
+  pptx extension at all. Both outputs are named like the PDF and lifted to the
+  top of the output directory. `HMD_DOC_REFERENCE_DOCX` and
+  `HMD_DOC_REFERENCE_PPTX` name a document whose styles the output adopts.
+  See NERD005.
+- fix: the conversion reads an extracted document body, not the rendered page.
+  pandoc converts a whole page, so the themed output put the sidebar, the search
+  box and the `¶` heading permalinks into the Word document — and in PowerPoint
+  the theme's own `<h1>` outranked the document title and took the first slide.
+- fix: `<section>` wrappers are removed before conversion. Sphinx wraps every
+  section in one, pandoc reads it as a Div, and a heading inside a Div starts no
+  slide — so the entire document arrived on a single slide whatever
+  `--slide-level` said. Both defects exited zero and produced plausible files;
+  they were found by inspecting the documents, not by a build failing.
+- feat: a requirements baseline for the transform, and `reqtrace` wired in as
+  `make reqs` / `make reqs-check` / `make check`. Nineteen requirements across
+  BUILD, BRAND, SEL and CONV; the Robot suite carries the IDs it verifies.
+- feat: the Robot suite covers the copyright override and the two new builders —
+  twelve cases, up from eight. `resources/OfficeChecks.py` reads the produced
+  `.docx` and `.pptx` with nothing outside the standard library.
+- fix: `meta-data/manifest.json` had `"name": "repo_name"` from a template. That
+  is the document title and the requirement ID prefix, so this repository's own
+  documents were titled "repo_name".
+
+
+## 2026-09-05
+
+Dependency upgrade cycle. Verified against the requirements-heavy docs in
+`hmd-cli-bartleby` (122 sphinx-needs items) and a fixture exercising the
+builders those docs do not: HTML, PDF, RevealJS, and PlantUML all build with
+**zero warnings**, and the Robot suite passes 8/8 against the rebuilt image.
+
+- feat: Sphinx 8.2.3 → **9.1.0**. The `sphinxdoc/sphinx-latexpdf` base image has
+  no 9.x tag, so it stays at 8.2.3 and requirements upgrade Sphinx over it. Those
+  two version numbers are meant to differ; the Dockerfiles say so.
+- feat: sphinx-needs 6.3.0 → **8.5.0**, two majors. Nothing in the existing
+  `req`/`spec`/`needtable` usage or the `needs_id_regex` and `needs_warnings`
+  config broke; 8.x adds schema validation, which passes clean.
+- feat: myst-parser 5.0.0 → 5.1.0, sphinxcontrib-confluencebuilder 3.0.0 → 3.2.0,
+  `requests` pinned at 2.34.2 rather than floating.
+- feat: PlantUML **1.2023.7 → 1.2026.7**, three years of releases, and now
+  downloaded from its GitHub release rather than the SourceForge mirror the
+  Makefile already described as "often slow and sometimes serves an HTML error
+  page instead". The download is checksum-verified, so a truncated or
+  substituted jar fails the build rather than surfacing at render time.
+- fix: `make image-local` preferred the jar from the published image, which
+  carries whatever PlantUML it was built with — so a version bump here would
+  have been silently ignored locally. The cached jar is now checked against
+  `PLANTUML_SHA256` and re-downloaded when it does not match.
+- fix: every build emitted two warnings about `_static/SourceSansPro/OFL.txt`, a
+  font licence that MyST parsed as a document. `_static` is excluded from source
+  discovery; static assets still copy.
+- fix: dropped `roman-numerals-py<4`. That distribution is deprecated in favour
+  of `roman-numerals`, which is what Sphinx 9 depends on, so the cap constrained
+  a package nothing was asking for.
+- fix: dropped `when-changed==0.3.0`. A 2016 file-watcher that nothing in the
+  repository referenced.
+- feat: `make test` runs the Robot suite against a locally built image. Two
+  things it needs were easy to lose: `--pythonpath`, because newer Robot
+  Framework no longer adds the suite's directory to `sys.path` and the
+  PDF-checking library lives in `test/resources`, and `TRANSFORM_IMAGE`, which
+  the compose file now honours — previously the suite could only test the
+  published image. The compose default also points at `neuronsphere` rather than
+  the old `hmdlabs` path, and the obsolete `version:` key is gone.
+
+
 ## 2026-09-04
 
 - feat: `HMD_DOC_COPYRIGHT` replaces the footer notice outright, and

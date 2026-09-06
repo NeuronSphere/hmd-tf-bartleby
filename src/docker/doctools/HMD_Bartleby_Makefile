@@ -18,6 +18,59 @@ help:
 pdf:
 	@$(SPHINXBUILD) -M latexpdf "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+# Word and PowerPoint come from pandoc, because Sphinx has no writer for either.
+#
+# singlehtml is the input rather than latex: it holds the whole document in one
+# file with its headings, tables and images intact, and pandoc's HTML reader is
+# far more reliable than its LaTeX reader on Sphinx's macros.
+#
+# DOCNAME matches the name conf.py gives the PDF, so a repository's outputs are
+# named consistently whichever builder produced them.
+DOCNAME            ?= $(or $(DOCUMENT_TITLE),$(HMD_DOC_REPO_NAME)-$(HMD_DOC_REPO_VERSION),documentation)
+PANDOC             ?= pandoc
+PANDOC_FLAGS       ?=
+PPTX_SLIDE_LEVEL   ?= 2
+
+# The reference documents are optional and carry the caller's styles — fonts,
+# colours, heading styles, a title slide. Without one, pandoc's defaults apply.
+# Paths are inside the container, so /hmd_transform/input/... reaches the
+# repository being built.
+DOCX_REFERENCE     ?= $(HMD_DOC_REFERENCE_DOCX)
+PPTX_REFERENCE     ?= $(HMD_DOC_REFERENCE_PPTX)
+
+# An explicit rule, so the catch-all below does not route this to sphinx-build.
+#
+# pandoc converts a whole page, so the themed singlehtml output would put the
+# sidebar and the theme's logo heading into the document — and onto the first
+# slide, since that heading outranks the document's own title. pandoc_body.py
+# reduces it to the document body and strips the heading permalink anchors.
+pandoc-source:
+	@$(SPHINXBUILD) -M singlehtml "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+	@python3 pandoc_body.py "$(BUILDDIR)/singlehtml/index.html" "$(BUILDDIR)/pandoc/body.html"
+
+docx: pandoc-source
+	@mkdir -p "$(BUILDDIR)/docx"
+	$(PANDOC) --from=html --to=docx \
+	  --resource-path="$(BUILDDIR)/singlehtml" \
+	  $(if $(DOCX_REFERENCE),--reference-doc="$(DOCX_REFERENCE)",) \
+	  $(PANDOC_FLAGS) \
+	  -o "$(BUILDDIR)/docx/$(DOCNAME).docx" \
+	  "$(BUILDDIR)/pandoc/body.html"
+	@echo "wrote $(BUILDDIR)/docx/$(DOCNAME).docx"
+
+pptx: pandoc-source
+	@mkdir -p "$(BUILDDIR)/pptx"
+	$(PANDOC) --from=html --to=pptx \
+	  --slide-level=$(PPTX_SLIDE_LEVEL) \
+	  --resource-path="$(BUILDDIR)/singlehtml" \
+	  $(if $(PPTX_REFERENCE),--reference-doc="$(PPTX_REFERENCE)",) \
+	  $(PANDOC_FLAGS) \
+	  -o "$(BUILDDIR)/pptx/$(DOCNAME).pptx" \
+	  "$(BUILDDIR)/pandoc/body.html"
+	@echo "wrote $(BUILDDIR)/pptx/$(DOCNAME).pptx"
+
+.PHONY: pdf docx pptx pandoc-source
+
 # Catch-all target: route all unknown targets to Sphinx using the new
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile

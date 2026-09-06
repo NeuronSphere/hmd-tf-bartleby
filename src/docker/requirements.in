@@ -1,15 +1,17 @@
 hmd-tf-bartleby==<current>
-sphinx==8.2.3
+sphinx==9.1.0
 sphinx-copybutton==0.5.2
 sphinx-jsonschema==1.19.2
 sphinx-inline-tabs==2025.12.21.14
 sphinxcontrib-plantuml==0.31
 sphinx-revealjs==3.2.1
-sphinxcontrib-confluencebuilder==3.0.0
+sphinxcontrib-confluencebuilder==3.2.0
 sphinxcontrib.datatemplates==0.11.0
 nbsphinx==0.9.8
-sphinx-needs==6.3.0
-myst-parser==5.0.0
-when-changed==0.3.0
-requests
-roman-numerals-py<4
+sphinx-needs==8.5.0
+myst-parser==5.1.0
+requests==2.34.2
+# Sphinx uses Pillow for image handling. It is in the base image already, but no
+# requirement here referenced it, so nothing kept it current — and Pillow is
+# where the image-parsing CVEs live.
+pillow==12.3.0

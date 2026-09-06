@@ -17,10 +17,49 @@ cd ../some-docs-repo
 bartleby --image hmd-tf-bartleby:local html
 ```
 
-`make image-local` needs no network and no private index credentials: it takes
-`plantuml.jar` from an image already on this machine and installs the transform's
-Python package from source. A code-only change rebuilds in seconds. `make help`
-lists the rest of the targets; `make smoke` checks the built image runs.
+`make image-local` needs no private index credentials: it installs the
+transform's Python package from source, and takes `plantuml.jar` from an image
+already on this machine when that copy matches the pinned version — otherwise it
+downloads and checksum-verifies it. A code-only change rebuilds in seconds.
+`make help` lists the rest of the targets; `make smoke` reports the Sphinx and
+PlantUML the built image will use.
+
+### Keeping the image current
+
+```bash
+docker run --rm --entrypoint pip hmd-tf-bartleby:local list --outdated
+docker run --rm --entrypoint sh hmd-tf-bartleby:local -c 'apt-get update -qq; apt list --upgradable'
+```
+
+Both should be empty apart from packages a requirement caps. Two currently are:
+`docutils` stops below 0.23 because Sphinx requires it, and `jsonschema-rs`
+below 0.53 because sphinx-needs does.
+
+`requirements.in` pins direct dependencies, and the Dockerfiles install with
+`--upgrade-strategy eager` so their dependencies come up too — without it,
+everything the base image installed stays at whatever version that was.
+Anything the base image provides but no requirement references needs pinning
+explicitly to be kept current; `pillow` is the example.
+
+The runtime Python is the base image's. There is no `sphinxdoc/sphinx-latexpdf`
+tag beyond 8.2.3, so moving off 3.13 means building a texlive base ourselves.
+
+### Tests
+
+```bash
+make test                      # Robot suite against hmd-tf-bartleby:local
+make test TAG=other            # or another local tag
+```
+
+The suite renders through the container and checks the results, including
+reading the produced PDFs for the confidentiality statement and the cover logo.
+It needs Docker and Compose; `ROBOT` defaults to `uvx`, so its Python
+dependencies need not be installed globally.
+
+Worth knowing what it does *not* cover: the Confluence builder, and the branding
+environment variables. Renders of a real repository are the check for those —
+`../hmd-cli-bartleby` is a good target, since its documentation is dense with
+sphinx-needs items.
 
 ## Interface
 
@@ -52,6 +91,23 @@ is applied to Sphinx settings after `conf.py` runs, so it wins.
 Setting `html_logo` replaces the logo rather than adding to it: the theme's own
 default steps aside, and the build log says which logo it kept. Note the footer
 renders `©` immediately before your string, so include any spacing you want.
+
+### Word and PowerPoint
+
+The `docx` and `pptx` builders convert the rendered documentation with pandoc,
+which Sphinx has no writer for. Both are named like the PDF and land at the top
+of the output directory.
+
+| Variable | Effect |
+|----------|--------|
+| `HMD_DOC_REFERENCE_DOCX` | A `.docx` whose styles the Word output adopts |
+| `HMD_DOC_REFERENCE_PPTX` | A `.pptx` whose layouts the deck adopts |
+
+Paths are inside the container, so `/hmd_transform/input/…` reaches the
+repository being built. Without a reference document, pandoc's defaults apply.
+
+Each section of the document starts a new slide. `PPTX_SLIDE_LEVEL` changes
+which heading level does that; it defaults to 2.
 
 ### Logs
 

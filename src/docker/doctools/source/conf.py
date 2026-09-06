@@ -13,6 +13,7 @@
 import os
 import sys
 import json
+from pathlib import Path
 from urllib.parse import unquote
 import datetime
 from importlib import import_module
@@ -209,7 +210,10 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+# _static holds assets, not documents. The font licence in there is a .txt that
+# MyST happily parses as a document, which put two warnings in every build every
+# consumer has ever run.
+exclude_patterns = ["_static/**"]
 
 # path to jar file used for generating puml diagrams
 plantuml = "java -jar /usr/local/bin/plantuml.jar"
@@ -231,6 +235,47 @@ default_logo = os.environ.get(
     "DEFAULT_LOGO", f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
 )
 
+
+# A documentation build should not be able to hang on a logo. requests without a
+# timeout blocks indefinitely, and it did: a suite run stalled for 61 minutes on
+# an unresponsive host before failing. The timeout is (connect, read).
+#
+# The download also went straight into the destination file, so a failure left a
+# zero-byte image behind that the build would then use as the logo. It is
+# written beside it and moved into place only once it has arrived whole.
+LOGO_TIMEOUT = (5, 30)
+
+
+def _download_logo(url, setting):
+    """Fetch a logo into the static directory and return its filename."""
+    filename = unquote(url).split("?")[0].split("/")[-1]
+    destination = Path(f"./{html_static_path[0]}/{filename}")
+    partial = destination.with_suffix(destination.suffix + ".partial")
+
+    try:
+        resp = requests.get(url, stream=True, timeout=LOGO_TIMEOUT)
+    except requests.RequestException as exc:
+        raise Exception(
+            f"Cannot download {setting} {url}: {exc}. "
+            "Point it at a file in the repository to build without network access."
+        ) from exc
+
+    if not resp.ok:
+        raise Exception(f"Cannot download {setting} {url}: HTTP {resp.status_code}")
+
+    try:
+        with partial.open("wb") as handler:
+            for chunk in resp.iter_content(1024):
+                if not chunk:
+                    break
+                handler.write(chunk)
+        partial.replace(destination)
+    finally:
+        partial.unlink(missing_ok=True)
+
+    return filename
+
+
 # In case empty string is passed
 if not default_logo:
     default_logo = f"./{html_static_path[0]}/NeuronSphereSwoosh.jpg"
@@ -241,20 +286,7 @@ if not default_logo:
 default_html_logo = os.environ.get("HTML_DEFAULT_LOGO") or default_logo
 
 if default_html_logo.startswith("http"):
-    filename = default_html_logo.split("?")[0].split("/")[-1]
-    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
-        resp = requests.get(default_html_logo, stream=True)
-
-        if not resp.ok:
-            raise Exception(f"Cannot download HTML logo {default_html_logo}")
-
-        for chunk in resp.iter_content(1024):
-            if not chunk:
-                break
-
-            handler.write(chunk)
-
-    default_html_logo = filename
+    default_html_logo = _download_logo(default_html_logo, "HTML logo")
 else:
     default_html_logo = default_html_logo.removeprefix(f"./{html_static_path[0]}")
 
@@ -306,20 +338,7 @@ if os.environ.get("CONFIDENTIALITY_STATEMENT", None) is not None:
 latex_logo = os.environ.get("PDF_DEFAULT_LOGO", default_logo)
 
 if latex_logo.startswith("http"):
-    filename = unquote(latex_logo).split("?")[0].split("/")[-1]
-    with open(f"./{html_static_path[0]}/{filename}", "wb") as handler:
-        resp = requests.get(latex_logo, stream=True)
-
-        if not resp.ok:
-            raise Exception(f"Cannot download PDF_DEFAULT_LOGO {latex_logo}")
-
-        for chunk in resp.iter_content(1024):
-            if not chunk:
-                break
-
-            handler.write(chunk)
-
-    latex_logo = f"./{html_static_path[0]}/{filename}"
+    latex_logo = f"./{html_static_path[0]}/{_download_logo(latex_logo, 'PDF_DEFAULT_LOGO')}"
 
 # set document naming
 doc_name = os.environ.get("DOCUMENT_TITLE", f"{repo_name}-{repo_version}")

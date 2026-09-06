@@ -1,6 +1,6 @@
 {
   "identifier": "hmd-tf-bartleby",
-  "name": "repo_name",
+  "name": "hmd-tf-bartleby",
   "description": "Runs the document generation transform",
   "project_type": {
     "name": "transform"
@@ -12,7 +12,31 @@
     }
   },
   "build": {
-    "commands": [["python"], ["docker"]]
+    "commands": [
+      [
+        "python"
+      ],
+      [
+        "docker"
+      ]
+    ]
   },
-  "deploy": {}
+  "deploy": {},
+  "bartleby": {
+    "roots": {
+      "index": {
+        "root_doc": "index",
+        "builders": [
+          "html",
+          "pdf"
+        ],
+        "config": {
+          "needs_id_regex": "^HMD_[A-Z0-9_]+$",
+          "needs_warnings": {
+            "requirement_without_test": "type == 'req' and not links_back and 'trace-exempt' not in tags"
+          }
+        }
+      }
+    }
+  }
 }
