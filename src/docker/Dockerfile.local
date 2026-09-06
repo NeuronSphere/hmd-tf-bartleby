@@ -1,5 +1,5 @@
 # Stage 1: Download build artifacts in a lightweight throwaway image
-FROM python:3.13-slim AS deps
+FROM python:3.14-slim AS deps
 
 # PlantUML comes from its GitHub release rather than the SourceForge mirror,
 # which is slow and has been known to serve an HTML error page in place of the
@@ -41,8 +41,15 @@ RUN arch="$(dpkg --print-architecture)" && \
 # "fix" the mismatch by pinning Sphinx back to the base image's version.
 FROM sphinxdoc/sphinx-latexpdf:8.2.3
 
+# The base image ships whatever its packages were on the day it was built, and
+# nothing since. `apt list --upgradable` in the published image reported 68,
+# including bash, dpkg, base-files and ca-certificates — the OS half of the same
+# staleness the eager pip upgrade fixes. Upgrading here stays inside bookworm:
+# point releases and security updates, not a distro bump.
 RUN apt-get update && \
+    apt-get upgrade -y --no-install-recommends && \
     apt-get install -y --no-install-recommends default-jre-headless && \
+    apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
 COPY --from=deps /plantuml.jar /usr/local/bin/plantuml.jar
@@ -53,8 +60,24 @@ RUN dpkg -i /tmp/pandoc.deb && rm /tmp/pandoc.deb
 COPY doctools /hmd_transform/doctools
 COPY requirements.txt .
 
+# --upgrade-strategy eager upgrades the dependencies too, not just the pinned
+# packages. Without it, pip leaves everything the base image installed at
+# whatever version that was: a `pip list --outdated` on the built image showed
+# 16 stale packages, including certifi, urllib3 and pillow. Constraints still
+# apply — docutils stops at the highest release Sphinx allows.
 RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
-    pip install --no-cache-dir -r requirements.txt
+    pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir --upgrade --upgrade-strategy eager -r requirements.txt
+
+# roman-numerals-py is the deprecated name for roman-numerals, and both install
+# the same `roman_numerals` module. Both end up present: the base image
+# installed the old one, Sphinx 9 requires the new one, and whichever landed
+# last owns the files. Uninstalling the deprecated distribution therefore
+# deletes the module out from under the current one — verified, it leaves
+# ModuleNotFoundError — so it is reinstalled in the same layer.
+RUN pip uninstall -y roman-numerals-py && \
+    pip install --no-cache-dir --force-reinstall --no-deps roman-numerals
+
 
 ENV TRANSFORM_INSTANCE_CONTEXT="{\"shell\": \"default\"}"
 

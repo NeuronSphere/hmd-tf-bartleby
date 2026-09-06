@@ -2,6 +2,60 @@
 
 ## 2026-09-05 — Word and PowerPoint
 
+### A documentation build could hang forever
+
+Found by the upgrade cycle's own test run, which spent **61 minutes** inside
+`make html` before failing — and whose only visible symptom was a missing output
+file.
+
+- fix: `conf.py` fetched a logo given as a URL with `requests.get(...)` and **no
+  timeout**, so an unresponsive host blocked the build indefinitely. The fetch
+  is now bounded at `(5, 30)` and a failure is an error naming the URL and the
+  reason. Being network-dependent, it was intermittent: the same suite passed
+  12/12 an hour earlier.
+- fix: the download opened the destination file *before* the request, so a
+  failure left a zero-byte image behind that the build would then use as the
+  logo. It is written beside it and moved into place only once complete.
+- feat: `REQ_BRAND_007`, covered by a test that points the logo at `192.0.2.1`
+  — TEST-NET-1, which RFC 5737 reserves and nothing routes — and requires the
+  build to fail in under two minutes rather than wait.
+- fix: the Robot suite could not see a failed transform. `docker-compose up`
+  exits 0 however the container ended, so every case's `rc == 0` assertion was
+  vacuous and the hour-long failure surfaced only as an absent file. It now runs
+  with `--exit-code-from`.
+
+### Package currency
+
+The previous entry updated the *pinned* requirements, which is not the same as
+updating the image. `pip install -r` only upgrades what the file names, so every
+transitive dependency stayed at whatever the base image installed:
+`pip list --outdated` on the built image reported **16** stale packages,
+including `certifi` from January 2025, `urllib3`, and `pillow`.
+
+- fix: `--upgrade-strategy eager`, so dependencies are upgraded too and not just
+  the packages named in `requirements.in`. Sixteen stale packages became two,
+  both capped by a constraint rather than missed: `docutils` stops at 0.22.4
+  because Sphinx 9.1 requires `<0.23`, and `jsonschema-rs` at 0.52.1 because
+  sphinx-needs 8.5.0 requires `<0.53.0`.
+- fix: `pillow` is pinned. Nothing in the requirement graph referenced it — the
+  base image installs it and Sphinx uses it for images — so nothing kept it
+  current, and Pillow is where the image-parsing CVEs live. 11.1.0 → 12.3.0.
+- fix: removed the deprecated `roman-numerals-py`, which was installed alongside
+  its replacement `roman-numerals`. **Both install the same `roman_numerals`
+  module**, so which one answered `import roman_numerals` depended on install
+  order. Uninstalling the deprecated distribution deletes the shared module
+  files out from under the current one — confirmed, it leaves
+  `ModuleNotFoundError` — so the Dockerfiles remove and reinstall in one layer.
+- fix: OS packages are upgraded within bookworm. `apt list --upgradable` in the
+  published image reported **68**, including `bash`, `dpkg`, `base-files` and
+  `ca-certificates` — the base image ships whatever its packages were the day it
+  was built and nothing since.
+- The runtime Python stays at **3.13.2**, which is the base image's. There is no
+  `sphinxdoc/sphinx-latexpdf` tag beyond 8.2.3, so moving to 3.14 means building
+  our own texlive base — the thing that base image exists to avoid. The
+  throwaway download stage moved to `python:3.14-slim`, which affects nothing at
+  runtime.
+
 - feat: `docx` and `pptx` builders, converting the rendered documentation with
   pandoc 3.11. Sphinx has no writer for either and every community docx
   extension is abandoned — `docxbuilder` last released in 2020, and there is no

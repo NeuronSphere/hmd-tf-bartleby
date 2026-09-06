@@ -81,6 +81,18 @@ Slide Deck Is Produced One Slide Per Section
     Should Be True    ${slides} > 1    The deck has ${slides} slide(s); the sections did not split
     Slides Should Contain    ${file}    Indices and tables
 
+Unreachable Logo Fails Fast Instead Of Hanging
+    [Tags]    branding    dynamic_env    REQ_BRAND_007
+    [Documentation]    A logo URL that cannot be reached must fail the build quickly.
+    ...    requests without a timeout blocks indefinitely, and did: a run stalled
+    ...    for 61 minutes before failing.
+    Setup Transform Test    ${unreachable_logo}
+    ${start}=    Get Time    epoch
+    Do transform expecting failure
+    ${elapsed}=    Evaluate    int(time.time()) - ${start}    modules=time
+    Should Be True    ${elapsed} < 120    The build took ${elapsed}s, so the fetch is not bounded
+    Reset Environment Variables
+
 *** Keywords ***
 Test transform
     [Documentation]    Run transform and verify process completes successfully
@@ -111,11 +123,28 @@ Load Environment Variables
 
 Do transform
     [Documentation]    Run transform container with expected volume mounts and env variables
-    Run Process    docker-compose    up    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
+    #
+    # --exit-code-from makes compose return the container's exit code. Without
+    # it compose exits 0 however the container ended, so a failed transform was
+    # only detectable by an output file being absent — which is how an hour-long
+    # hang showed up as "index.html does not exist".
+    ${result}=    Run Transform Container
+    Should be equal    ${result.rc}    ${0}
+
+Do transform expecting failure
+    [Documentation]    Run the transform and require that it fails
+    ${result}=    Run Transform Container
+    Should Not Be Equal As Integers    ${result.rc}    0    The transform should have failed
+    RETURN    ${result}
+
+Run Transform Container
+    [Documentation]    Run the container once and return the process result
+    Run Process    docker-compose    up    --exit-code-from    transform_test
+    ...    stdout=run-transform.log    stderr=STDOUT    alias=runtransform
     ${result}=    Get Process Result    runtransform
     Log    ${result.stdout}
-    Should be equal    ${result.rc}    ${0}
     Run Process    docker-compose    down
+    RETURN    ${result}
 
 Check output files
     [Documentation]    Verify output file count matches input file count

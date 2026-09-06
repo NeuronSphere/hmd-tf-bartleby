@@ -168,3 +168,17 @@ pptx_output = {
     "CONFIDENTIALITY_STATEMENT": "",
     "output_files": [f"bartleby-test-{version}.pptx"],
 }
+
+
+# 192.0.2.0/24 is TEST-NET-1, reserved by RFC 5737 and not routable, so the
+# connection attempt cannot succeed anywhere — which is the point: the build has
+# to give up on its own rather than wait for a network that never answers.
+unreachable_logo = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "html"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_unreachable",
+    "DEFAULT_LOGO": "http://192.0.2.1/logo.png",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": [],
+}

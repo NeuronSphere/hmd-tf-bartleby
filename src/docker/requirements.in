@@ -11,3 +11,7 @@ nbsphinx==0.9.8
 sphinx-needs==8.5.0
 myst-parser==5.1.0
 requests==2.34.2
+# Sphinx uses Pillow for image handling. It is in the base image already, but no
+# requirement here referenced it, so nothing kept it current — and Pillow is
+# where the image-parsing CVEs live.
+pillow==12.3.0

@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-19 requirement items, verified by 0 Go tests and 12 Robot tests.
+20 requirement items, verified by 0 Go tests and 13 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -27,8 +27,8 @@ Summary
      - Test links
      - Exempt
    * - BRAND
-     - 6
      - 7
+     - 8
      - 1
    * - BRAND_006
      - 1
@@ -85,6 +85,9 @@ Coverage by requirement
      - implemented
    * - :need:`HMD_TF_BARTLEBY_REQ_BRAND_006_SPEC001`
      - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_BRAND_007`
+     - transform_run: Unreachable Logo Fails Fast Instead Of Hanging
      - implemented
    * - :need:`HMD_TF_BARTLEBY_REQ_BUILD_001`
      - transform_run: Test Bartleby Transform
@@ -235,6 +238,13 @@ Robot Framework tests
     :tags: robot
 
     ``test/transform_run.robot:11``
+
+.. test:: transform_run: Unreachable Logo Fails Fast Instead Of Hanging
+    :id: HMD_TF_BARTLEBY_TEST_ROBOT_1E4800EA
+    :links: HMD_TF_BARTLEBY_REQ_BRAND_007
+    :tags: robot
+
+    ``test/transform_run.robot:84``
 
 .. test:: transform_run: Word Document Is Produced
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_E8C8FB94

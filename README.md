@@ -24,6 +24,26 @@ downloads and checksum-verifies it. A code-only change rebuilds in seconds.
 `make help` lists the rest of the targets; `make smoke` reports the Sphinx and
 PlantUML the built image will use.
 
+### Keeping the image current
+
+```bash
+docker run --rm --entrypoint pip hmd-tf-bartleby:local list --outdated
+docker run --rm --entrypoint sh hmd-tf-bartleby:local -c 'apt-get update -qq; apt list --upgradable'
+```
+
+Both should be empty apart from packages a requirement caps. Two currently are:
+`docutils` stops below 0.23 because Sphinx requires it, and `jsonschema-rs`
+below 0.53 because sphinx-needs does.
+
+`requirements.in` pins direct dependencies, and the Dockerfiles install with
+`--upgrade-strategy eager` so their dependencies come up too — without it,
+everything the base image installed stays at whatever version that was.
+Anything the base image provides but no requirement references needs pinning
+explicitly to be kept current; `pillow` is the example.
+
+The runtime Python is the base image's. There is no `sphinxdoc/sphinx-latexpdf`
+tag beyond 8.2.3, so moving off 3.13 means building a texlive base ourselves.
+
 ### Tests
 
 ```bash

@@ -78,3 +78,17 @@ appears on other people's documents.
     *Verification:* by manual run against a repository that sets them —
     performed against ``glintf-design``. The Robot suite drives the transform
     through environment variables only, so it cannot reach this path.
+
+.. req:: Never hang fetching a logo
+    :id: HMD_TF_BARTLEBY_REQ_BRAND_007
+    :status: implemented
+
+    Where a logo is given as a URL, the fetch shall be bounded by a timeout, and
+    a failure shall be reported as an error naming the URL and the reason. A
+    documentation build shall not be able to block indefinitely on it.
+
+    ``requests`` without a timeout waits forever. It did: a suite run spent 61
+    minutes inside ``make html`` before failing, and the only visible symptom
+    was a missing output file. The partially written image is also no longer
+    left in place, since the build would otherwise use a zero-byte file as the
+    logo.
