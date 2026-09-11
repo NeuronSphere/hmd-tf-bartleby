@@ -105,10 +105,10 @@ context: $(JAR) $(DEB)
 	cp src/docker/Dockerfile.dev $(CONTEXT)/Dockerfile
 	cp $(JAR) $(CONTEXT)/plantuml.jar
 	cp $(DEB) $(CONTEXT)/pandoc.deb
-	@# The published requirements pin the transform's own package from the private
-	@# index. Locally the package is installed from source instead, so that pin is
-	@# dropped and no index credentials are needed.
-	grep -v '^hmd-tf-bartleby' src/docker/requirements.in > $(CONTEXT)/requirements.txt
+	@# requirements.txt is hand-maintained rather than compiled, and names only
+	@# public packages — the transform's own package is installed from source by
+	@# every Dockerfile — so it stages as-is and needs no index credentials.
+	cp src/docker/requirements.txt $(CONTEXT)/requirements.txt
 	@echo "staged $(CONTEXT) from the working tree"
 
 ## image-local: build $(IMAGE):$(TAG) from the working tree

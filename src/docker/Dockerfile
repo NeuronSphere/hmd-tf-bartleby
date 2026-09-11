@@ -80,6 +80,12 @@ RUN --mount=type=secret,id=pipconfig,dst=/etc/pip.conf \
 RUN pip uninstall -y roman-numerals-py && \
     pip install --no-cache-dir --force-reinstall --no-deps roman-numerals
 
+# The transform's own package. hmd-cli-docker appended `/src/python/` to the
+# requirements file it generated for install_local repos; with that compile step
+# gone it is installed explicitly here, as Dockerfile.dev and Dockerfile.local
+# already do.
+RUN pip install --no-cache-dir /src/python/
+
 
 ENV TRANSFORM_INSTANCE_CONTEXT="{\"shell\": \"default\"}"
 ENV NID_CONTEXT=default

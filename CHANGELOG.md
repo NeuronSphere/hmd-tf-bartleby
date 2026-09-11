@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-09-11
+
+### The docker build could not resolve Sphinx 9
+
+- fix: `hmd docker build` compiled `src/docker/requirements.in` into a lock using
+  the *host* Python, and both nsenv and the `hmd-img-projectbuilder` build image
+  are 3.11 while this image runs 3.13. `sphinx==9.1.0` requires 3.12, so the
+  resolution was unsatisfiable and the build failed in 19 seconds without ever
+  reaching Docker. The pins now live directly in `src/docker/requirements.txt`
+  and no compile runs. The image is unchanged: `--upgrade-strategy eager`
+  already upgraded past the lock's transitive pins, so the direct pins were the
+  only part of that file that reached it. `make image-local` never ran the
+  compile, which is why the upgrade cycle did not catch this.
+- fix: the transform's own package is installed by an explicit
+  `pip install /src/python/` in `src/docker/Dockerfile`, matching
+  `Dockerfile.dev` and `Dockerfile.local`. `hmd-cli-docker` used to append that
+  path to the file it generated for `install_local` repos, and it no longer
+  generates one.
+
 ## 2026-09-05 — Word and PowerPoint
 
 ### A documentation build could hang forever

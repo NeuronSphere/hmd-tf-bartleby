@@ -35,11 +35,20 @@ Both should be empty apart from packages a requirement caps. Two currently are:
 `docutils` stops below 0.23 because Sphinx requires it, and `jsonschema-rs`
 below 0.53 because sphinx-needs does.
 
-`requirements.in` pins direct dependencies, and the Dockerfiles install with
-`--upgrade-strategy eager` so their dependencies come up too — without it,
-everything the base image installed stays at whatever version that was.
-Anything the base image provides but no requirement references needs pinning
-explicitly to be kept current; `pillow` is the example.
+`src/docker/requirements.txt` pins direct dependencies, and the Dockerfiles
+install with `--upgrade-strategy eager` so their dependencies come up too —
+without it, everything the base image installed stays at whatever version that
+was. Anything the base image provides but no requirement references needs
+pinning explicitly to be kept current; `pillow` is the example.
+
+That file is edited by hand, not compiled from a `requirements.in`. The compile
+`hmd docker build` performs runs on the *host* Python, and both nsenv and the
+`hmd-img-projectbuilder` build image are 3.11 while this image runs 3.13 — so
+`sphinx==9.1.0`, which needs 3.12, could not resolve and the build failed before
+Docker was reached. Since `--upgrade-strategy eager` upgrades past a lock's
+transitive pins anyway, the direct pins were the only part of the compiled file
+that ever reached the image, and nothing is lost by writing them directly.
+Reintroduce a `requirements.in` once the build image resolves on 3.12 or newer.
 
 The runtime Python is the base image's. There is no `sphinxdoc/sphinx-latexpdf`
 tag beyond 8.2.3, so moving off 3.13 means building a texlive base ourselves.

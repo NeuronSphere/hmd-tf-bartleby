@@ -1,0 +1,28 @@
+# Direct pins for the transform image. Hand-maintained, not generated.
+#
+# This was requirements.in, which `hmd docker build` compiled to a lock. That
+# compile runs on the host Python — nsenv and hmd-img-projectbuilder are both
+# 3.11 — while the image runs 3.13, so sphinx==9.1.0 (Python>=3.12) made the
+# resolution unsatisfiable and the build failed before Docker was reached.
+# hmd-cli-docker only compiles when a .in exists, so there no longer is one.
+#
+# The image is unaffected. The Dockerfiles install with --upgrade-strategy
+# eager, which upgrades past a lock's transitive pins, so the direct pins below
+# were always the only part of that file that reached the image. Restore a .in
+# once the builder resolves on 3.12 or newer.
+sphinx==9.1.0
+sphinx-copybutton==0.5.2
+sphinx-jsonschema==1.19.2
+sphinx-inline-tabs==2025.12.21.14
+sphinxcontrib-plantuml==0.31
+sphinx-revealjs==3.2.1
+sphinxcontrib-confluencebuilder==3.2.0
+sphinxcontrib.datatemplates==0.11.0
+nbsphinx==0.9.8
+sphinx-needs==8.5.0
+myst-parser==5.1.0
+requests==2.34.2
+# Sphinx uses Pillow for image handling. It is in the base image already, but no
+# requirement here referenced it, so nothing kept it current — and Pillow is
+# where the image-parsing CVEs live.
+pillow==12.3.0
