@@ -38,5 +38,50 @@
         }
       }
     }
+  },
+  "discovery": {
+    "summary": "hmd-tf-bartleby is the runtime half of the Bartleby documentation transform: a Docker image bundling Sphinx, LaTeX, and PlantUML that renders a repository's docs/ tree to HTML, PDF, RevealJS slides, or PlantUML images. It runs both as a standalone local tool (driven by the hmd-cli-bartleby CLI or 'make image-local') and as a NeuronSphere Transform, triggered by repo_instance entities in DEPLOY_NEXT state in the global graph database. The Python entry point wraps Sphinx's build tooling and PlantUML rendering behind the HMD transform I/O convention (/hmd_transform/input, /hmd_transform/output).",
+    "entry_points": [
+      {
+        "path": "src/python/hmd_tf_bartleby/hmd_tf_bartleby.py",
+        "description": "Transform implementation: entry_point() dispatches Sphinx builds and render_puml() renders PlantUML diagrams."
+      },
+      {
+        "path": "README.md",
+        "description": "Explains local dev workflow (make image-local, make test), image contents, and how this relates to hmd-cli-bartleby."
+      },
+      {
+        "path": "docs/transforms.rst",
+        "description": "Describes the transform's context variables (TRANSFORM_INSTANCE_CONTEXT, NID_CONTEXT), I/O directories, and project structure."
+      },
+      {
+        "path": "Makefile",
+        "description": "Build/test/smoke targets for the local image (image-local, test, smoke)."
+      }
+    ],
+    "capabilities": [
+      {
+        "name": "entry_point",
+        "kind": "function",
+        "description": "Main transform entry point invoked by the Docker entrypoint; runs the Sphinx build for the requested output format(s).",
+        "location": "src/python/hmd_tf_bartleby/hmd_tf_bartleby.py"
+      },
+      {
+        "name": "render_puml",
+        "kind": "function",
+        "description": "Renders PlantUML source files to images via the bundled plantuml.jar.",
+        "location": "src/python/hmd_tf_bartleby/hmd_tf_bartleby.py"
+      }
+    ],
+    "related_docs": [
+      {
+        "title": "Bartleby Transform overview",
+        "path": "docs/transforms.rst"
+      },
+      {
+        "title": "Documentation index",
+        "path": "docs/index.rst"
+      }
+    ]
   }
 }
