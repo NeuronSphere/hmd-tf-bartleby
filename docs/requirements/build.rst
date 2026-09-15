@@ -57,3 +57,30 @@ follows is what it owes the caller in return.
 
     *Verification:* by inspection and manual run; the same missing failing-build
     fixture as ``REQ_BUILD_004``.
+
+.. req:: Export the requirements data with every build
+    :id: HMD_TF_BARTLEBY_REQ_BUILD_006
+    :status: implemented
+
+    Every build shall write sphinx-needs' ``needs.json`` to the builder's output
+    directory, whether or not the repository being built asks for it.
+
+    A repository that declares requirements has them in its documentation
+    already; leaving the machine-readable export switched off means anything
+    that wants to trace, publish, or check them has to run a second build with
+    different settings to get the same data the first build had in hand.
+
+.. spec:: The export is on by default and the repository can still turn it off
+    :id: HMD_TF_BARTLEBY_REQ_BUILD_006_SPEC001
+    :links: HMD_TF_BARTLEBY_REQ_BUILD_006
+    :status: implemented
+    :tags: trace-exempt
+
+    The image's ``conf.py`` shall default ``needs_build_json`` to true, and
+    shall do so before the manifest's ``config`` block is applied, so that a
+    repository setting ``"needs_build_json": false`` still wins.
+
+    *Verification:* the default is covered by ``REQ_BUILD_006``'s test. The
+    override is the manifest-config path that ``REQ_BRAND_006_SPEC001`` records
+    as untestable here — the Robot suite drives the transform through
+    environment variables only, so it cannot set a repository's manifest config.

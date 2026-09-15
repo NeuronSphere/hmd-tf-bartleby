@@ -93,6 +93,19 @@ Unreachable Logo Fails Fast Instead Of Hanging
     Should Be True    ${elapsed} < 120    The build took ${elapsed}s, so the fetch is not bounded
     Reset Environment Variables
 
+Needs Data Is Exported By Default
+    [Tags]    needs    REQ_BUILD_006
+    [Documentation]    sphinx-needs writes needs.json only when it is asked to, so
+    ...    a repository that declares requirements would otherwise have to set
+    ...    needs_build_json itself to get the machine-readable copy.
+    Test transform    ${needs_json_default}
+    ${raw}=    Get File    ${needs_json_default}[TRANSFORM_OUTPUT]/${needs_json_default}[output_files][0]
+    ${ids}=    Evaluate
+    ...    [n for v in json.loads($raw)["versions"].values() for n in v["needs"]]
+    ...    modules=json
+    Should Contain    ${ids}    ${needs_json_default}[need_id]
+    ...    msg=needs.json carries ${ids}, not the requirement the fixture declares
+
 *** Keywords ***
 Test transform
     [Documentation]    Run transform and verify process completes successfully

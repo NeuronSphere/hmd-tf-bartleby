@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-09-15
+
+### needs.json is exported by default
+
+- feat: `conf.py` sets `needs_build_json = True`, so every build writes
+  sphinx-needs' `needs.json` into the builder's output directory alongside the
+  rendered document. sphinx-needs writes it only when asked, so a repository
+  that declares requirements previously had to set the flag itself, or run a
+  second build with different settings, to get the machine-readable copy of the
+  data the first build already had in hand. The default is applied before the
+  manifest's `config` block, so a repository can still turn it off with
+  `"needs_build_json": false`.
+- test: `Needs Data Is Exported By Default` runs the transform and checks that
+  the exported file carries the requirement the fixture declares. That fixture
+  is an orphaned page, `test/input_files1/docs/needs_fixture.rst` — needs are
+  collected when a document is read, so the item reaches `needs.json` without
+  entering the rendered document the PDF, Word and PowerPoint suites check. The
+  templated `html` and `pdf` cases also expect `needs.json` now, which covers
+  both builders' output directories for free.
+
 ## 2026-09-11
 
 ### The docker build could not resolve Sphinx 9

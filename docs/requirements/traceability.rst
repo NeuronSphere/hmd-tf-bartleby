@@ -16,7 +16,7 @@ generated from those declarations.
 Summary
 -------
 
-20 requirement items, verified by 0 Go tests and 13 Robot tests.
+22 requirement items, verified by 0 Go tests and 14 Robot tests.
 
 .. list-table::
    :header-rows: 1
@@ -35,9 +35,13 @@ Summary
      - 0
      - 1
    * - BUILD
-     - 5
-     - 3
+     - 6
+     - 4
      - 2
+   * - BUILD_006
+     - 1
+     - 0
+     - 1
    * - CONV
      - 4
      - 5
@@ -102,6 +106,12 @@ Coverage by requirement
      - *exempt: see the requirement text*
      - implemented
    * - :need:`HMD_TF_BARTLEBY_REQ_BUILD_005`
+     - *exempt: see the requirement text*
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_BUILD_006`
+     - transform_run: Needs Data Is Exported By Default
+     - implemented
+   * - :need:`HMD_TF_BARTLEBY_REQ_BUILD_006_SPEC001`
      - *exempt: see the requirement text*
      - implemented
    * - :need:`HMD_TF_BARTLEBY_REQ_CONV_001`
@@ -217,6 +227,13 @@ Robot Framework tests
     :tags: robot
 
     ``test/transform_run.robot:38``
+
+.. test:: transform_run: Needs Data Is Exported By Default
+    :id: HMD_TF_BARTLEBY_TEST_ROBOT_528042B5
+    :links: HMD_TF_BARTLEBY_REQ_BUILD_006
+    :tags: robot
+
+    ``test/transform_run.robot:96``
 
 .. test:: transform_run: Root Document Is Dynamic
     :id: HMD_TF_BARTLEBY_TEST_ROBOT_D7FDBC25

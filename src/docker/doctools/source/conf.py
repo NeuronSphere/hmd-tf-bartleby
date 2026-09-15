@@ -70,6 +70,20 @@ extensions = [
     "sphinx_needs",
 ]
 
+# -- sphinx-needs ------------------------------------------------------------
+
+# needs.json is the machine-readable copy of whatever requirements, specs and
+# tests the documentation declares, and sphinx-needs writes it only when asked.
+# A repository that has gone to the trouble of declaring them has the data in
+# hand at the end of every build, so exporting it costs nothing, while leaving
+# it switched off costs a second build with different settings to anything that
+# wants to trace, publish or check them. It lands in the builder's output
+# directory, beside the rendered document.
+#
+# A repository that does not want it sets "needs_build_json": false in its
+# manifest config, which is applied after this file runs and wins.
+needs_build_json = True
+
 source_suffix = {
     ".rst": "restructuredtext",
     ".txt": "markdown",

@@ -20,7 +20,7 @@ set_one = {
     "CONFIDENTIALITY_STATEMENT": """HMD Labs Confidential – This document contains information that is confidential and proprietary. Neither this
 document nor the information herein may be reproduced, used, or disclosed to or for the benefit of any third
 party without the prior written consent of HMD Labs.""",
-    "output_files": ["html/index.html", "html/readme.html"],
+    "output_files": ["html/index.html", "html/readme.html", "html/needs.json"],
 }
 
 set_two = {
@@ -30,7 +30,7 @@ set_two = {
     "TRANSFORM_OUTPUT": "output_files2",
     "CONFIDENTIALITY_STATEMENT": "",
     "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
-    "output_files": [f"bartleby-test-{version}.pdf"],
+    "output_files": [f"bartleby-test-{version}.pdf", "latex/needs.json"],
 }
 
 confidential_pdf_one = {
@@ -181,4 +181,20 @@ unreachable_logo = {
     "DEFAULT_LOGO": "http://192.0.2.1/logo.png",
     "CONFIDENTIALITY_STATEMENT": "",
     "output_files": [],
+}
+
+
+# needs.json is exported by default, so a repository that declares requirements
+# gets the machine-readable copy out of the same build that renders them. The
+# item it should carry lives on an orphaned fixture page, which keeps it out of
+# the rendered document the other suites check.
+needs_json_default = {
+    "TRANSFORM_INSTANCE_CONTEXT": '{"shell": "html"}',
+    "TRANSFORM_NID": "transform-test-reg1-hmd-123456789101",
+    "TRANSFORM_INPUT": "input_files1",
+    "TRANSFORM_OUTPUT": "output_files_needs",
+    "DEFAULT_LOGO": "https://neuronsphere.io/hubfs/bartleby_assets/NeuronSphereSwoosh.jpg",
+    "CONFIDENTIALITY_STATEMENT": "",
+    "output_files": ["html/needs.json"],
+    "need_id": "BARTLEBY_TEST_REQ_001",
 }
