@@ -220,7 +220,12 @@ def entry_point():
             logger.info(f"Executing:  {cmd_ar}")
             with open(log_file, "w") as log:
                 sphinx = run(
-                    cmd_ar, text=True, cwd=tmpdir, stderr=STDOUT, stdout=log, env=build_env
+                    cmd_ar,
+                    text=True,
+                    cwd=tmpdir,
+                    stderr=STDOUT,
+                    stdout=log,
+                    env=build_env,
                 )
 
             if Path(os.path.join(tmpdir, "build")).exists():
@@ -242,7 +247,9 @@ def entry_point():
                 # log is otherwise buried in the latex build tree next to
                 # megabytes of static assets.
                 for latex_log in output_content_path.rglob("latex/*.log"):
-                    shutil.copy2(latex_log, log_path / f"{shell}-latex-{latex_log.name}")
+                    shutil.copy2(
+                        latex_log, log_path / f"{shell}-latex-{latex_log.name}"
+                    )
             else:
                 logger.info("No generated docs to copy..")
 
